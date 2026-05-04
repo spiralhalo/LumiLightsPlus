@@ -1,0 +1,20 @@
+{
+    "map": [
+        {
+            "predicate": {
+                "materialPredicate": {
+                    "renderLayerName": "entity_cutout_no_cull"
+                }
+            },
+            "material": "lumiext:metal_bumpy_transform"
+        },
+        {
+            "predicate": {
+                "materialPredicate": {
+                    "renderLayerName": "entity_cutout"
+                }
+            },
+            "material": "lumiext:iron_wood_transform"
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "defaultMaterial": "lumiext:rail",
+    "variants": {
+        "powered=true,shape=east_west":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=north_south":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_east":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_north":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_south":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_west":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=east_west,waterlogged=true":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=north_south,waterlogged=true":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_east,waterlogged=true":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_north,waterlogged=true":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_south,waterlogged=true":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_west,waterlogged=true":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=east_west,waterlogged=false":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=north_south,waterlogged=false":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_east,waterlogged=false":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_north,waterlogged=false":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_south,waterlogged=false":{
+            "defaultMaterial": "lumiext:rail_powered"
+        },
+        "powered=true,shape=ascending_west,waterlogged=false":{
+            "defaultMaterial": "lumiext:rail_powered"
+        }
+    }
+}

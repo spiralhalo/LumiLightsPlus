@@ -1,0 +1,41 @@
+{
+  "id": "LUMIEXT",
+  "version": 1,
+  "conf": {
+    "TextureResolution": 64,
+    "MaterialCoverage": [
+      "ApplyAll",
+      "NonVanillaFriendly"
+    ],
+    "ApplyBumpMinerals": true,
+    "BricksBevelMode": [
+      "Beveled",
+      "TextureBump",
+      "Off"
+    ],
+    "BevelMode": [
+      "Beveled",
+      "TextureBump",
+      "Off"
+    ],
+    "ApplyBumpLow": false,
+    "ApplyToolBump": true,
+    "ApplyBumpDefault": true,
+    "BaseStoneRoughness": {
+      "default": 7,
+      "min": 1,
+      "max": 10
+    },
+    "PolishedRoughness": {
+      "default": 3,
+      "min": 1,
+      "max": 10
+    },
+    "WoodPlanksRoughness": {
+      "default": 6,
+      "min": 1,
+      "max": 10
+    },
+    "HiResBumps": false
+  }
+}

@@ -1,6 +1,9 @@
 {
-  "pack": {
-	"pack_format": 12,
-	"description": "§3Aesthetic shader pack\n§8by spiralhalo [{VERSION_TAG}]"
-  }
+	"pack": {
+		"pack_format": 15,
+		"supported_formats" : [8, 9999],
+		"min_format": 8,
+		"max_format": 9999,
+		"description": "§3Stylish shader pack\n§8by spiralhalo [v0.42]"
+	}
 }

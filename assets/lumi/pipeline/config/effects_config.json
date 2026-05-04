@@ -1,0 +1,96 @@
+{
+	options: [
+		{
+			includeToken: "lumi:effects_config",
+			categoryKey: "config.lumi_lights.category.effects",
+			options: {
+				ss_reflection: {
+					default: true,
+					nameKey: "config.lumi_lights.value.ss_reflection",
+					descriptionKey: "config.lumi_lights.help.ss_reflection"
+				},
+				ss_ao: {
+					default: false,
+					nameKey: "config.lumi_lights.value.ss_ao",
+					descriptionKey: "config.lumi_lights.help.ss_ao"
+				},
+				combine_vanilla_ao: {
+					default: true,
+					nameKey: "config.lumi_lights.value.combine_vanilla_ao",
+					descriptionKey: "config.lumi_lights.help.combine_vanilla_ao"
+				},
+				volumetric_clouds: {
+					default: true,
+					nameKey: "config.lumi_lights.value.volumetric_clouds",
+					descriptionKey: "config.lumi_lights.help.volumetric_clouds"
+				},
+				volumetric_fog: {
+					default: true,
+					nameKey: "config.lumi_lights.value.volumetric_fog",
+					descriptionKey: "config.lumi_lights.help.volumetric_fog"
+				},
+				bloom_effect: {
+					default: true,
+					nameKey: "config.lumi_lights.value.bloom_effect",
+					descriptionKey: "config.lumi_lights.help.bloom_effect"
+				},
+				high_quality_bloom: {
+					default: true,
+					nameKey: "config.lumi_lights.value.high_quality_bloom",
+					descriptionKey: "config.lumi_lights.help.high_quality_bloom"
+				},
+				water_waves: {
+					default: true,
+					nameKey: "config.lumi_lights.value.water_waves",
+					descriptionKey: "config.lumi_lights.help.water_waves"
+				},
+				water_caustics: {
+					default: true,
+					nameKey: "config.lumi_lights.value.water_caustics",
+					descriptionKey: "config.lumi_lights.help.water_caustics"
+				},
+				water_foam: {
+					default: true,
+					nameKey: "config.lumi_lights.value.water_foam",
+					descriptionKey: "config.lumi_lights.help.water_foam"
+				},
+				refraction_effect: {
+					default: true,
+					nameKey: "config.lumi_lights.value.refraction_effect",
+					descriptionKey: "config.lumi_lights.help.refraction_effect"
+				},
+				reflection_maximum_roughness_relative: {
+					default: 3,
+					min: 1,
+					max: 10,
+					nameKey: "config.lumi_lights.value.reflection_maximum_roughness_relative",
+					descriptionKey: "config.lumi_lights.help.reflection_maximum_roughness_relative"
+				},
+				ssao_radius_f: {
+					default: 1.0, min: 0.1, max: 2.0,
+					nameKey: "config.lumi_lights.value.ssao_radius",
+					descriptionKey: "config.lumi_lights.help.ssao_radius"
+				},
+				ssao_intensity_f: {
+					default: 3.0, min: 1.0, max: 5.0,
+					nameKey: "config.lumi_lights.value.ssao_intensity",
+					descriptionKey: "config.lumi_lights.help.ssao_intensity"
+				},
+				bloom_intensity_f: {
+					default: 0.5,
+					min: 0.1,
+					max: 1.0,
+					nameKey: "config.lumi_lights.value.bloom_intensity",
+					descriptionKey: "config.lumi_lights.help.bloom_intensity"
+				},
+				bloom_scale_f: {
+					default: 1.0,
+					min: 0.1,
+					max: 2.0,
+					nameKey: "config.lumi_lights.value.bloom_scale",
+					descriptionKey: "config.lumi_lights.help.bloom_scale"
+				},
+			}
+		},
+	]
+}

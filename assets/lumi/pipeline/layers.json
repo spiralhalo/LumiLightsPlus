@@ -1,0 +1,220 @@
+{
+	images: [
+		{
+			name: "swap_color",
+			internalFormat: "RGB8",
+			pixelFormat: "RGB",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+		{
+			name: "vanilla_color",
+			internalFormat: "RGB8",
+			pixelFormat: "RGB",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "vanilla_depth",
+			internalFormat: "DEPTH_COMPONENT",
+			pixelFormat: "DEPTH_COMPONENT",
+			pixelDataType: "FLOAT",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+			]
+		}, 
+		{
+			name: "vanilla_transl_color",
+			internalFormat: "RGBA8",
+			pixelFormat: "RGBA",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "translucent_depth",
+			internalFormat: "DEPTH_COMPONENT",
+			pixelFormat: "DEPTH_COMPONENT",
+			pixelDataType: "FLOAT",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+			]
+		}, 
+		{
+			name: "junk_color",
+			internalFormat: "R8",
+			pixelFormat: "RED",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "clouds_depth",
+			internalFormat: "DEPTH_COMPONENT",
+			pixelFormat: "DEPTH_COMPONENT",
+			pixelDataType: "FLOAT",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+			]
+		},
+		{
+			name: "entity_hitbox",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+			]
+		},
+		{
+			name: "entity_hitbox_depth",
+			internalFormat: "DEPTH_COMPONENT",
+			pixelFormat: "DEPTH_COMPONENT",
+			pixelDataType: "FLOAT",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+			]
+		},
+		{
+			name: "weather_color",
+			internalFormat: "RGBA8",
+			pixelFormat: "RGBA",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "weather_depth",
+			internalFormat: "DEPTH_COMPONENT",
+			pixelFormat: "DEPTH_COMPONENT",
+			pixelDataType: "FLOAT",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+			]
+		},
+		{
+			name: "gbuffer_trans",
+			depth: 2,
+			internalFormat: "RGBA16",
+			pixelFormat: "RGBA",
+			target: "TEXTURE_2D_ARRAY",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		},
+		{
+			name: "gbuffer_main_etc",
+			depth: 5,
+			internalFormat: "RGB8",
+			pixelFormat: "RGB",
+			target: "TEXTURE_2D_ARRAY",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "gbuffer_lightnormal",
+			depth: 7,
+			// Floating point so we can have signed normals and absurdly high emissive levels
+			internalFormat: "RGB16F",
+			pixelFormat: "RGB",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D_ARRAY",
+			texParams: [
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"}
+			]
+		}, {
+			name: "particles_depth",
+			internalFormat: "DEPTH_COMPONENT",
+			pixelFormat: "DEPTH_COMPONENT",
+			pixelDataType: "FLOAT",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_COMPARE_MODE", val: "NONE"}
+			]
+		},
+	],
+
+	framebuffers: [
+		{
+			name: "vanilla",
+			depthAttachment: {image: "vanilla_depth"},
+			colorAttachments: [{image: "vanilla_color"}]
+		},
+		{
+			name: "vanilla_transl",
+			depthAttachment: {image: "translucent_depth"},
+			colorAttachments: [{image: "vanilla_transl_color", clearColor: 0x00000000}]
+		},
+		{
+			name: "entity_hitbox",
+			depthAttachment: {image: "entity_hitbox_depth", clearDepth: 1.0},
+			colorAttachments: [{image: "entity_hitbox", clearColor: 0x00000000}]
+		},
+		{
+			name: "swap",
+			colorAttachments: [{image: "swap_color"}]
+		},
+		{
+			name: "solid",
+			depthAttachment: {image: "vanilla_depth", clearDepth: 1.0},
+			colorAttachments: [
+				{image: "vanilla_color", clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 0, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 3, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 4, clearColor: 0x00000000},
+				{image: "gbuffer_main_etc",	layer: 0, clearColor: 0x00ff0000},
+				{image: "gbuffer_main_etc",	layer: 1, clearColor: 0x00000000},
+			]
+		},
+		{
+			name: "translucent",
+			depthAttachment: {image: "translucent_depth", clearDepth: 1.0},
+			colorAttachments: [
+				{image: "gbuffer_trans",	layer: 0, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 1, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 5, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 6, clearColor: 0x00000000},
+				{image: "gbuffer_main_etc",	layer: 2, clearColor: 0x00ff0000},
+				{image: "gbuffer_main_etc",	layer: 3, clearColor: 0x00000000},
+			]
+		},
+		{
+			name: "particles",
+			depthAttachment: {image: "particles_depth", clearDepth: 1.0},
+			colorAttachments: [
+				{image: "gbuffer_trans", layer: 1, clearColor: 0x00000000},
+				{image: "gbuffer_lightnormal", layer: 2, clearColor: 0x00000000},
+			]
+		},
+		{
+			name: "clouds",
+			depthAttachment: {image: "clouds_depth", clearDepth: 1.0},
+			colorAttachments: [
+				{image: "junk_color", clearColor: 0x00000000},
+			]
+		},
+		{
+			name: "weather",
+			depthAttachment: {image: "weather_depth", clearDepth: 1.0},
+			colorAttachments: [
+				{image: "weather_color", clearColor: 0x00000000},
+			]
+		},
+	],
+}

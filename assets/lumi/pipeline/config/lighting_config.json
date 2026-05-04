@@ -1,0 +1,81 @@
+{
+	options: [
+		{
+			includeToken: "lumi:lighting_config",
+			categoryKey: "config.lumi_lights.category.lighting",
+			options: {
+				block_light_mode: {
+					default: "warm",
+					choices: ["warm", "neutral"],
+					enum: true,
+					prefix: "block_light_mode_",
+					nameKey: "config.lumi_lights.value.block_light_mode",
+					descriptionKey: "config.lumi_lights.help.block_light_mode"
+				},
+				handheld_light_radius: {
+					default: 10,
+					min: 0,
+					max: 14,
+					nameKey: "config.lumi_lights.value.handheld_light_radius",
+					descriptionKey: "config.lumi_lights.help.handheld_light_radius"
+				},
+				blocklight_boost: {
+					default: 1.0,
+					min: 0.25,
+					max: 2.0,
+					nameKey: "config.lumi_lights.value.indoors_brightness",
+					descriptionKey: "config.lumi_lights.help.indoors_brightness"
+				},
+				sunlight_boost: {
+					default: 1.0,
+					min: 0.25,
+					max: 3.0,
+					nameKey: "config.lumi_lights.value.outdoors_brightness",
+					descriptionKey: "config.lumi_lights.help.outdoors_brightness"
+				},
+				lightning_flash_boost: {
+					default: 1.0,
+					min: 0.0,
+					max: 2.0,
+					nameKey: "config.lumi_lights.value.lightning_flash_brightness",
+					descriptionKey: "config.lumi_lights.help.lightning_flash_brightness"
+				},
+				noon_ambient_boost: {
+					default: 1.0,
+					min: 0.25,
+					max: 2.0,
+					nameKey: "config.lumi_lights.value.sky_ambient_brightness",
+					descriptionKey: "config.lumi_lights.help.sky_ambient_brightness"
+				},
+				ambient_boost: {
+					default: 1.0,
+					min: 0.0,
+					max: 2.0,
+					nameKey: "config.lumi_lights.value.ambient_brightness",
+					descriptionKey: "config.lumi_lights.help.ambient_brightness"
+				},
+				night_ambient_boost: {
+					default: 1.0,
+					min: 0.0,
+					max: 2.0,
+					nameKey: "config.lumi_lights.value.night_ambient_brightness",
+					descriptionKey: "config.lumi_lights.help.night_ambient_brightness"
+				},
+				nether_ambient_boost: {
+					default: 1.0,
+					min: 0.0,
+					max: 8.0,
+					nameKey: "config.lumi_lights.value.nether_ambient_brightness",
+					descriptionKey: "config.lumi_lights.help.nether_ambient_brightness"
+				},
+				end_ambient_boost: {
+					default: 1.0,
+					min: 0.0,
+					max: 2.0,
+					nameKey: "config.lumi_lights.value.end_ambient_brightness",
+					descriptionKey: "config.lumi_lights.help.end_ambient_brightness"
+				},
+			}
+		},
+	]
+}

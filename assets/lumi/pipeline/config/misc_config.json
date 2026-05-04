@@ -1,0 +1,241 @@
+{
+	options: [
+		{
+			includeToken: "lumi:aesthetics_config",
+			categoryKey: "config.lumi_lights.category.aesthetics",
+			options: {
+				water_color: {
+					default: "natural_blue",
+					choices: ["natural_blue", "vanilla", "no_texture", "no_color"],
+					enum: true,
+					prefix: "water_color_",
+					nameKey: "config.lumi_lights.value.water_color",
+					descriptionKey: "config.lumi_lights.help.water_color"
+				},
+				// hurt_mode: {
+				// 	default: "classic_red",
+				// 	choices: ["classic_red", "vapordeath", "glitch_city"],
+				// 	enum: true,
+				// 	prefix: "hurt_mode_",
+				// 	nameKey: "config.lumi_lights.value.hurt_mode",
+				// 	descriptionKey: "config.lumi_lights.help.hurt_mode"
+				// },
+				glint_mode: {
+					default: "glint_texture",
+					choices: ["glint_texture", "glint_shader"],
+					enum: true,
+					prefix: "glint_mode_",
+					nameKey: "config.lumi_lights.value.glint_mode",
+					descriptionKey: "config.lumi_lights.help.glint_mode"
+				},
+				glint_style: {
+					default: "glint_a",
+					choices: ["glint_a", "glint_b", "glint_d"],
+					enum: true,
+					prefix: "glint_style_",
+					nameKey: "config.lumi_lights.value.glint_style",
+					descriptionKey: "config.lumi_lights.help.glint_style"
+				},
+				glint_red: {
+					default: 0.655,
+					min: 0.0,
+					max: 1.0,
+					nameKey: "config.lumi_lights.value.glint_red",
+					descriptionKey: "config.lumi_lights.help.glint_red"
+				},
+				glint_green: {
+					default: 0.333,
+					min: 0.0,
+					max: 1.0,
+					nameKey: "config.lumi_lights.value.glint_green",
+					descriptionKey: "config.lumi_lights.help.glint_green"
+				},
+				glint_blue: {
+					default: 1.0,
+					min: 0.0,
+					max: 1.0,
+					nameKey: "config.lumi_lights.value.glint_blue",
+					descriptionKey: "config.lumi_lights.help.glint_blue"
+				},
+				toon_outline: {
+					default: false,
+					nameKey: "config.lumi_lights.value.toon_outline",
+					descriptionKey: "config.lumi_lights.help.toon_outline"
+				},
+				small_hand: {
+					default: false,
+					nameKey: "config.lumi_lights.value.small_hand",
+					descriptionKey: "config.lumi_lights.help.small_hand"
+				},
+			}
+		},
+		{
+			includeToken: "lumi:experimental_config",
+			categoryKey: "config.lumi_lights.category.experimental",
+			options: {
+				shadow_workaround: {
+					default: true,
+					nameKey: "config.lumi_lights.value.shadow_workaround",
+					descriptionKey: "config.lumi_lights.help.shadow_workaround"
+				},
+				// multi_bounce_reflection: {
+				// 	default: false,
+				// 	nameKey: "config.lumi_lights.value.multi_bounce_reflection",
+				// 	descriptionKey: "config.lumi_lights.help.multi_bounce_reflection"
+				// },
+				// kaleidoskop: {
+				// 	default: false,
+				// 	nameKey: "config.lumi_lights.value.kaleidoskop",
+				// 	descriptionKey: "config.lumi_lights.help.kaleidoskop"
+				// },
+				// reflection_on_hand: {
+				// 	default: false,
+				// 	nameKey: "config.lumi_lights.value.reflection_on_hand",
+				// 	descriptionKey: "config.lumi_lights.help.reflection_on_hand"
+				// },
+				// rain_puddles: {
+				// 	default: false,
+				// 	nameKey: "config.lumi_lights.value.rain_puddles",
+				// 	descriptionKey: "config.lumi_lights.help.rain_puddles"
+				// },
+				// exposure_func: {
+				// 	default: "average",
+				// 	choices: ["median", "average"],
+				// 	enum: true,
+				// 	prefix: "exposure_func_",
+				// 	nameKey: "config.lumi_lights.value.exposure_func",
+				// 	descriptionKey: "config.lumi_lights.help.exposure_func"
+				// },
+				antialiasing: {
+					default: "taa",
+					choices: ["none", "taa"],
+					enum: true,
+					prefix: "antialiasing_",
+					nameKey: "config.lumi_lights.value.antialiasing",
+					descriptionKey: "config.lumi_lights.help.antialiasing"
+				},
+				tonemap_operator: {
+					default: "default",
+					choices: ["default", "naive", "contrast"],
+					enum: true,
+					prefix: "tmo_",
+					nameKey: "config.lumi_lights.value.tonemap_operator",
+					descriptionKey: "config.lumi_lights.help.tonemap_operator"
+				},
+				post_tmo_brightness: {
+					default: 1.0,
+					min: 0.01,
+					max: 10.0,
+					nameKey: "config.lumi_lights.value.post_tmo_brightness",
+					descriptionKey: "config.lumi_lights.help.post_tmo_brightness"
+				},
+				post_tmo_contrast: {
+					default: 1.0,
+					min: 0.01,
+					max: 10.0,
+					nameKey: "config.lumi_lights.value.post_tmo_contrast",
+					descriptionKey: "config.lumi_lights.help.post_tmo_contrast"
+				},
+				post_tmo_saturation: {
+					default: 1.0,
+					min: 0.01,
+					max: 10.0,
+					nameKey: "config.lumi_lights.value.post_tmo_saturation",
+					descriptionKey: "config.lumi_lights.help.post_tmo_saturation"
+				},
+				color_gamma: {
+					default: 2.0,
+					min: 0.5,
+					max: 5.0,
+					nameKey: "config.lumi_lights.value.color_gamma",
+					descriptionKey: "config.lumi_lights.help.color_gamma"
+				},
+				albedo_brightening: {
+					default: 0,
+					min: 0,
+					max: 20,
+					nameKey: "config.lumi_lights.value.albedo_brightening",
+					descriptionKey: "config.lumi_lights.help.albedo_brightening"
+				},
+				ssao_override: {
+					default: false,
+					nameKey: "config.lumi_lights.value.ssao_override",
+					descriptionKey: "config.lumi_lights.help.ssao_override"
+				},
+				ssao_num_steps: {
+					default: 5, min: 1, max: 10,
+					nameKey: "config.lumi_lights.value.ssao_num_steps",
+					descriptionKey: "config.lumi_lights.help.ssao_num_steps"
+				},
+				ssao_num_directions: {
+					default: 5, min: 1, max: 10,
+					nameKey: "config.lumi_lights.value.ssao_num_directions",
+					descriptionKey: "config.lumi_lights.help.ssao_num_directions"
+				},
+				ssao_bias: {
+					default: 0.3, min: 0.01, max: 100.0,
+					nameKey: "config.lumi_lights.value.ssao_bias",
+					descriptionKey: "config.lumi_lights.help.ssao_bias"
+				},
+			}
+		},
+		{
+			includeToken: "lumi:debug_config",
+			categoryKey: "config.lumi_lights.category.debug",
+			options: {
+				disable_entities: {
+					default: false,
+					nameKey: "config.lumi_lights.value.disable_entities",
+					descriptionKey: "config.lumi_lights.help.disable_entities"
+				},
+				water_noise_debug: {
+					default: false,
+					nameKey: "config.lumi_lights.value.water_noise_debug",
+					descriptionKey: "config.lumi_lights.help.water_noise_debug"
+				},
+				white_world: {
+					default: false,
+					nameKey: "config.lumi_lights.value.white_world",
+					descriptionKey: "config.lumi_lights.help.white_world"
+				},
+				dithering_mode: {
+					default: "blue_noise",
+					choices: ["blue_noise", "halton", "disabled"],
+					enum: true,
+					prefix: "dithering_mode_",
+					nameKey: "config.lumi_lights.value.dithering_mode",
+					descriptionKey: "config.lumi_lights.help.dithering_mode"
+				},
+				exposure_debug: {
+					default: false,
+					nameKey: "config.lumi_lights.value.exposure_debug",
+					descriptionKey: "config.lumi_lights.help.exposure_debug"
+				},
+				taa_debug_render: {
+					default: "off",
+					choices: ["off", "velocity", "depth", "frames"],
+					enum: true,
+					prefix: "taa_debug_render_",
+					nameKey: "config.lumi_lights.value.taa_debug_render",
+					descriptionKey: "config.lumi_lights.help.taa_debug_render"
+				},
+				cloud_time: {
+					default: "client",
+					choices: ["client", "world", "stop"],
+					enum: true,
+					prefix: "cloud_time_",
+					nameKey: "config.lumi_lights.value.cloud_time",
+					descriptionKey: "config.lumi_lights.help.cloud_time"
+				},
+				overlay_debug: {
+					default: "none",
+					choices: ["none", "neon", "disco"],
+					enum: true,
+					prefix: "overlay_debug_",
+					nameKey: "config.lumi_lights.value.overlay_debug",
+					descriptionKey: "config.lumi_lights.help.overlay_debug"
+				},
+			}
+		}
+	]
+}

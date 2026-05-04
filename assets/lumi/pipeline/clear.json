@@ -1,0 +1,35 @@
+{
+	beforeWorldRender: {
+		passes: [
+			{
+				name: "clear_main",
+				framebuffer: "solid",
+				program: "frex_clear"
+			}, {
+				name: "clear_translucent",
+				framebuffer: "translucent",
+				program: "frex_clear"
+			},  {
+				name: "clear_vanilla_transl",
+				framebuffer: "vanilla_transl",
+				program: "frex_clear"
+			}, {
+				name: "clear_entity_hitbox",
+				framebuffer: "entity_hitbox",
+				program: "frex_clear"
+			}, {
+				name: "clear_particles",
+				framebuffer: "particles",
+				program: "frex_clear"
+			}, {
+				name: "clear_clouds",
+				framebuffer: "clouds",
+				program: "frex_clear"
+			}, {
+				name: "clear_weather",
+				framebuffer: "weather",
+				program: "frex_clear"
+			}
+		]
+	},
+}

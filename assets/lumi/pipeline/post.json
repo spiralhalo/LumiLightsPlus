@@ -1,0 +1,66 @@
+{
+	framebuffers: [
+		{
+			name: "post",
+			colorAttachments: [
+				{image: "vanilla_color"}
+			]
+		},
+	],
+
+	programs: [
+		{
+			name: "post",
+			vertexSource: "lumi:shaders/pass/shading.vert",
+			fragmentSource: "lumi:shaders/pass/post.frag",
+			samplers: [
+				"u_color_result",
+				"u_color_depth",
+				"u_color_others",
+
+				"u_vanilla_depth",
+				"u_vanilla_clouds_depth",
+				"u_vanilla_transl_color",
+				"u_translucent_depth",
+				"u_entity_hitbox",
+				"u_entity_hitbox_depth",
+
+				"u_gbuffer_main_etc",
+				"u_gbuffer_lightnormal",
+				"u_gbuffer_shadow",
+
+ 				"u_resources",
+				"u_tex_nature",
+			]
+		},
+	],
+
+	fabulous: {
+		passes: [
+			{
+				name: "post",
+				program: "post",
+				framebuffer: "post",
+				samplerImages: [
+					"color_result",
+					"color_depth",
+					"color_others",
+
+					"vanilla_depth",
+					"clouds_depth",
+					"vanilla_transl_color",
+					"translucent_depth",
+					"entity_hitbox",
+					"entity_hitbox_depth",
+
+					"gbuffer_main_etc",
+					"gbuffer_lightnormal",
+					"gbuffer_shadow",
+
+					"resources",
+					"lumi:textures/misc/nature.png",
+				]
+			},
+		]
+	}
+}

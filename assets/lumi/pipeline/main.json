@@ -1,0 +1,65 @@
+{
+	// Managed draw targets
+	drawTargets: {
+		solidTerrain: "solid",			 // terrain and entities
+		translucentTerrain: "translucent", // translucent terrain
+		translucentEntity: "translucent",  // translucent ITEM entities
+		translucentParticles: "particles", // TODO: segregate solid particles
+		weather: "weather",
+		clouds: "clouds",
+	},
+
+	// Unmanaged draw targets
+	defaultFramebuffer: "vanilla",
+	fabulousTargets: {
+		translucent: "vanilla_transl", // translucent terrain
+		entity: "entity_hitbox",	  // literally just entity hitbox
+		particles: "vanilla_transl",
+		weather: "weather",
+		clouds: "clouds",
+	},
+
+	materialProgram: {
+		vertexSource: "lumi:shaders/forward/main.vert",
+		fragmentSource: "lumi:shaders/forward/main.frag",
+		// glsl names for samplers additive to the FREX pre-defined samplers
+		samplers: [
+			"u_resources",
+			"u_tex_nature"
+		],
+		// image names for samplers additive to the FREX pre-defined samplers
+		samplerImages: [
+			"resources",
+			"lumi:textures/misc/nature.png"
+		]
+	},
+
+	smoothBrightnessBidirectionaly: true,
+	enablePBR: true,
+
+	include: [
+		"lumi:pipeline/init.json",
+		"lumi:pipeline/layers.json",
+		// "lumi:pipeline/common.json",
+		// PASSES IN CORRECT ORDER
+		// NB: Passes need to be in the same "include" level to be ordered correctly.
+		//	 Passes in higher "include" level will always come before passes in lower level.
+		"lumi:pipeline/clear.json",
+		"lumi:pipeline/color.json",
+		"lumi:pipeline/post.json",
+		"lumi:pipeline/taa.json",
+		"lumi:pipeline/bloom.json",
+		// "lumi:pipeline/mtn.json",
+		// "lumi:pipeline/ao.json",
+	],
+
+	programs: [
+		{
+			name: "copy",
+			vertexSource: "lumi:shaders/pass/basic.vert",
+			fragmentSource: "lumi:shaders/pass/copy.frag",
+			samplers: ["u_input"]
+		},
+	],
+
+}

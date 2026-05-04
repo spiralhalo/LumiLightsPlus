@@ -22,8 +22,8 @@
 	descriptionKey: "pipeline.lumi_lights.desc",
 
 	include: [
-		"lumi:pipeline/main.json",
-		"lumi:pipeline/config.json",
+		"lumi:pipeline/main.json5",
+		"lumi:pipeline/config.json5",
 	],
 
 	// pixelFormat and pixelDataType should not matter because the textures

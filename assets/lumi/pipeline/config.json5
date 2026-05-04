@@ -1,0 +1,8 @@
+{
+	include: [
+		"lumi:pipeline/config/effects_config.json5",
+		"lumi:pipeline/config/lighting_config.json5",
+		"lumi:pipeline/config/environment_config.json5",
+		"lumi:pipeline/config/misc_config.json5",
+	]
+}

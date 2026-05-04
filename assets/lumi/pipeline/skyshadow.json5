@@ -5,7 +5,7 @@
 	},
 
 	include: [
-		"lumi:pipeline/config/shadow_config.json",
+		"lumi:pipeline/config/shadow_config.json5",
 	],
 	
 	skyShadows: {

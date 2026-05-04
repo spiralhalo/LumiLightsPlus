@@ -3,8 +3,8 @@
 	descriptionKey: "pipeline.lumi_lights_deluxe.desc",
 
 	include: [
-		"lumi:pipeline/main.json",
-		"lumi:pipeline/skyshadow.json",
-		"lumi:pipeline/config.json",
+		"lumi:pipeline/main.json5",
+		"lumi:pipeline/skyshadow.json5",
+		"lumi:pipeline/config.json5",
 	],
 }

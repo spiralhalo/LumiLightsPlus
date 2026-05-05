@@ -37,10 +37,13 @@ void main()
 
 	vec4 albedo = texture(u_color_others, vec3(v_texcoord, ID_OTHER_ALBEDO));
 
-	float idLight = albedo.a == 0.0 ? ID_SOLID_LIGT : (albedo.a < 1.0 ? ID_TRANS_LIGT : ID_PARTS_LIGT);
-	float idMaterial = albedo.a == 0.0 ? ID_SOLID_MATS : ID_TRANS_MATS;
-	float idNormal = albedo.a == 0.0 ? ID_SOLID_NORM : ID_TRANS_NORM;
-	float idMicroNormal = albedo.a == 0.0 ? ID_SOLID_MNORM : ID_TRANS_MNORM;
+	float dMin = texture(u_color_depth, v_texcoord).r;
+	float dTrans = texture(u_translucent_depth, v_texcoord).r;
+
+	float idLight = (albedo.a == 0.0 || dTrans > dMin) ? ID_SOLID_LIGT : (albedo.a < 1.0 ? ID_TRANS_LIGT : ID_PARTS_LIGT);
+	float idMaterial = (albedo.a == 0.0 || dTrans > dMin) ? ID_SOLID_MATS : ID_TRANS_MATS;
+	float idNormal = (albedo.a == 0.0 || dTrans > dMin) ? ID_SOLID_NORM : ID_TRANS_NORM;
+	float idMicroNormal = (albedo.a == 0.0 || dTrans > dMin) ? ID_SOLID_MNORM : ID_TRANS_MNORM;
 
 	if (notEndPortal(u_gbuffer_lightnormal) || albedo.a == 0.0) {
 		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_translucent_depth, u_gbuffer_shadow, u_tex_nature, u_resources, idLight, idMaterial, idNormal, idMicroNormal);
@@ -51,8 +54,6 @@ void main()
 
 	fragColor = ldr_tonemap(fragColor);
 	fragColor = premultBlend(after, fragColor);
-
-	float dMin = texture(u_color_depth, v_texcoord).r;
 
 	fragColor = hdr_inverseTonemap(fragColor);
 
@@ -75,7 +76,6 @@ void main()
 	fragColor = blindnessFog(fragColor, distToEye);
 	fragColor = ldr_tonemap(fragColor);
 
-	float dTrans = texture(u_translucent_depth, v_texcoord).r;
 	float dSolid = texture(u_vanilla_depth, v_texcoord).r;
 	vec4 cVanillaTrans = texture(u_vanilla_transl_color, v_texcoord);
 

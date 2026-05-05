@@ -30,7 +30,7 @@
 		// image names for samplers additive to the FREX pre-defined samplers
 		samplerImages: [
 			"resources",
-			"lumi:textures/misc/nature.png"
+			"gen_nature_tex"
 		]
 	},
 
@@ -39,6 +39,7 @@
 
 	include: [
 		"lumi:pipeline/init.json5",
+		"lumi:pipeline/mtn.json5",
 		"lumi:pipeline/layers.json5",
 		// "lumi:pipeline/common.json5",
 		// PASSES IN CORRECT ORDER
@@ -49,7 +50,6 @@
 		"lumi:pipeline/post.json5",
 		"lumi:pipeline/taa.json5",
 		"lumi:pipeline/bloom.json5",
-		// "lumi:pipeline/mtn.json5",
 		// "lumi:pipeline/ao.json5",
 	],
 

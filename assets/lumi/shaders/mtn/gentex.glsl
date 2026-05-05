@@ -11,9 +11,9 @@ void main()
 {
 	basicFrameSetup();
 
-	vec2 scale = vec2(TEXSIZE) / frxu_size;
+	// vec2 scale = vec2(TEXSIZE) / frxu_size;
 
-	gl_Position.xy *= scale;
+	// gl_Position.xy *= scale;
 }
 #else
 const vec2 OFFSET = vec2(10.);

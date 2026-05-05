@@ -40,7 +40,7 @@
 		},
 	],
 
-	onResize: {
+	onInit: {
 		passes: [
 			{
 				name: "arraygen",

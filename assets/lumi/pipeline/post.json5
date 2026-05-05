@@ -58,7 +58,7 @@
 					"gbuffer_shadow",
 
 					"resources",
-					"lumi:textures/misc/nature.png",
+					"gen_nature_tex",
 				]
 			},
 		]

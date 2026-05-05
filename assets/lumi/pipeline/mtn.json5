@@ -1,15 +1,16 @@
 {
 	images: [
 		{
-			name: "gentex_result",
+			name: "gen_nature_tex",
 			lod: 0,
+			size: 1024,
 			internalFormat: "RGB8",
 			pixelFormat: "RGB",
 			pixelDataType: "UNSIGNED_BYTE",
 			target: "TEXTURE_2D",
 			texParams: [ 
-				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
-				{name: "TEXTURE_WRAP_S", val: "CLAMP_TO_EDGE"}, {name: "TEXTURE_WRAP_T", val: "CLAMP_TO_EDGE"},
+				{name: "TEXTURE_MIN_FILTER", val: "LINEAR"}, {name: "TEXTURE_MAG_FILTER", val: "LINEAR"},
+				{name: "TEXTURE_WRAP_S", val: "REPEAT"}, {name: "TEXTURE_WRAP_T", val: "REPEAT"},
 			]
 		},
 	],
@@ -18,7 +19,7 @@
 		{
 			name: "gentex",
 			colorAttachments: [
-				{image: "gentex_result", clearColor: 0x00000000}
+				{image: "gen_nature_tex", clearColor: 0x00000000}
 			]
 		}
 	],
@@ -32,12 +33,14 @@
 		}
 	],
 
-	afterRenderHand: {
+	onInit: {
 		passes: [
 			{
 				name: "gentex",
 				program: "gentex",
 				framebuffer: "gentex",
+				width: 1024,
+				height: 1024,
 				samplerImages: []
 			},
 		]

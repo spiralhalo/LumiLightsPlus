@@ -1,5 +1,5 @@
 {
-    "emissive": true,
-    "vertexSource": "lumiext:shaders/material/default.vert",
-    "fragmentSource": "lumiext:shaders/material/ore.frag"
+	"emissive": true,
+	"vertexSource": "lumiext:shaders/material/default.vert",
+	"fragmentSource": "lumiext:shaders/material/ore.frag"
 }

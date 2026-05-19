@@ -1,11 +1,11 @@
 {
-    "defaultMap": {
-        "defaultMaterial": "lumiext:metal_bumpy",
-        "spriteMap": [
-            {
-                "sprite": "minecraft:block/water_still",
-                "material": "lumi:tasty_liquid"
-            }
-        ]
-    }
+	"defaultMap": {
+		"defaultMaterial": "lumiext:metal_bumpy",
+		"spriteMap": [
+			{
+				"sprite": "minecraft:block/water_still",
+				"material": "lumi:tasty_liquid"
+			}
+		]
+	}
 }

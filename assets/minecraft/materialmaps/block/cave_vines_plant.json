@@ -1,8 +1,8 @@
 {
-  "defaultMaterial": "fabric:standard",
-  "variants": {
+	"defaultMaterial": "fabric:standard",
+	"variants": {
 	"berries=true": {
-	  "defaultMaterial": "lumi:warmth"
+	"defaultMaterial": "lumi:warmth"
 	}
-  }
+	}
 }

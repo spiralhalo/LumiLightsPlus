@@ -1,6 +1,6 @@
 {
-    "disableDiffuse": true,
-    "blendMode": "translucent",
-    "vertexSource": "lumiext:shaders/material/default_bumpless.vert",
-    "fragmentSource": "lumiext:shaders/material/translucent.frag"
+	"disableDiffuse": true,
+	"blendMode": "translucent",
+	"vertexSource": "lumiext:shaders/material/default_bumpless.vert",
+	"fragmentSource": "lumiext:shaders/material/translucent.frag"
 }

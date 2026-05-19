@@ -1,11 +1,11 @@
 {
-    "defaultMap": {
-        "defaultMaterial": "lumiext:metal_bumpy",
-        "spriteMap": [
-            {
-                "sprite": "minecraft:block/powder_snow",
-                "material": "lumiext:empty"
-            }
-        ]
-    }
+	"defaultMap": {
+		"defaultMaterial": "lumiext:metal_bumpy",
+		"spriteMap": [
+			{
+				"sprite": "minecraft:block/powder_snow",
+				"material": "lumiext:empty"
+			}
+		]
+	}
 }

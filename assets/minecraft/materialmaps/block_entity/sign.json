@@ -1,20 +1,20 @@
 {
-    "map": [
-        {
-            "predicate": {
-                "materialPredicate": {
-                    "renderLayerName": "text"
-                }
-            },
-            "material": "lumi:sign"
-        },
-        {
-            "predicate": {
-                "materialPredicate": {
-                    "renderLayerName": "text_polygon_offset"
-                }
-            },
-            "material": "lumi:sign"
-        }
-    ]
+	"map": [
+		{
+			"predicate": {
+				"materialPredicate": {
+					"renderLayerName": "text"
+				}
+			},
+			"material": "lumi:sign"
+		},
+		{
+			"predicate": {
+				"materialPredicate": {
+					"renderLayerName": "text_polygon_offset"
+				}
+			},
+			"material": "lumi:sign"
+		}
+	]
 }

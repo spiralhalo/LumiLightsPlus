@@ -1,7 +1,7 @@
 {
-  "variants": {
-    "lit=true": {
-      "defaultMaterial": "lumi:warmth"
-    }
-  }
+	"variants": {
+		"lit=true": {
+			"defaultMaterial": "lumi:warmth"
+		}
+	}
 }

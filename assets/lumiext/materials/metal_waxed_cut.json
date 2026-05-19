@@ -1,6 +1,6 @@
 {
-    "emissive": true,
-    "disableDiffuse": true,
-    "vertexSource": "lumiext:shaders/material/default_bevel.vert",
-    "fragmentSource": "lumiext:shaders/material/metal_bumpy.frag"
+	"emissive": true,
+	"disableDiffuse": true,
+	"vertexSource": "lumiext:shaders/material/default_bevel.vert",
+	"fragmentSource": "lumiext:shaders/material/metal_bumpy.frag"
 }

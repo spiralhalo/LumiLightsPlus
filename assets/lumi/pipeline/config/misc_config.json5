@@ -73,11 +73,11 @@
 			includeToken: "lumi:experimental_config",
 			categoryKey: "config.lumi_lights.category.experimental",
 			options: {
-				shadow_workaround: {
-					default: true,
-					nameKey: "config.lumi_lights.value.shadow_workaround",
-					descriptionKey: "config.lumi_lights.help.shadow_workaround"
-				},
+				// shadow_workaround: {
+				// 	default: true,
+				// 	nameKey: "config.lumi_lights.value.shadow_workaround",
+				// 	descriptionKey: "config.lumi_lights.help.shadow_workaround"
+				// },
 				// multi_bounce_reflection: {
 				// 	default: false,
 				// 	nameKey: "config.lumi_lights.value.multi_bounce_reflection",

@@ -11,7 +11,8 @@
 out float v_blindness;
 out float v_visibility;
 
-void fogVarsSetup() {
+void fogVarsSetup()
+{
 	// capture vanilla transition which happens when blindness happens/stops naturally (without milk, command, etc) 
 	v_blindness = l2_clampScale(1.0, 0.0, frx_luminance(frx_vanillaClearColor)) * float(max(frx_effectBlindness, frx_effectDarkness));
 
@@ -103,11 +104,13 @@ float fullFogFactor(float distToEye, vec3 toFrag, bool isUnderwater, float visib
 	return fogFactor;
 }
 
-float fogFactor(float distToEye, vec3 toFrag, bool isUnderwater) {
+float fogFactor(float distToEye, vec3 toFrag, bool isUnderwater)
+{
 	return fullFogFactor(distToEye, toFrag, isUnderwater, getVisibility(isUnderwater));
 }
 
-vec3 fogColor(bool submerged, vec3 toFrag) {
+vec3 fogColor(bool submerged, vec3 toFrag)
+{
 	//NB: only works if sun always rise from dead East instead of NE/SE etc.
 	float twGray = l2_clampScale(1.0, -1.0, toFrag.x * sign(frx_skyLightVector.x) * (1.0 - frx_worldIsMoonlit * 2.0));
 	twGray = l2_softenUp(twGray) * atmosv_OWTwilightFactor;
@@ -140,11 +143,40 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	return blended;
 }
 
-vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater) {
+vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
+{
 	return fog(color, distToEye, toFrag, isUnderwater, 1.0);
 }
 
-vec4 volumetricFog(sampler2DArrayShadow shadowBuffer, sampler2D natureTexture, vec4 color, float distToEye, vec3 toFrag, float yLightmap, float tileJitter, float depth, bool isUnderwater) {
-	return fog(color, distToEye, toFrag, isUnderwater, celestialLightRays(shadowBuffer, natureTexture, distToEye, toFrag, yLightmap, tileJitter, depth, isUnderwater));
-}
+#ifdef SHADOW_MAP_PRESENT
+	vec4 volumetricFog(
+		sampler2DArrayShadow shadowBuffer,
+		sampler2D natureTexture,
+		vec4 color,
+		float distToEye,
+		vec3 toFrag,
+		float yLightmap,
+		float tileJitter,
+		float depth,
+		bool isUnderwater
+		)
+	{
+		return fog(
+			color,
+			distToEye,
+			toFrag,
+			isUnderwater,
+			celestialLightRays(
+				shadowBuffer,
+				natureTexture,
+				distToEye,
+				toFrag,
+				yLightmap,
+				tileJitter,
+				depth,
+				isUnderwater
+				)
+			);
+	}
+#endif
 #endif

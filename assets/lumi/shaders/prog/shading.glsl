@@ -54,32 +54,46 @@ void shadingSetup() {
 
 #ifndef VERTEX_SHADER
 
-float denoisedShadowFactor(sampler2DArrayShadow shadowMap, vec2 texcoord, vec3 eyePos, float depth, float lighty, vec3 vertexNormal) {
-	// nasty
-	float transitionClamping = l2_clampScale(0.0, 0.1, frx_skyLightTransitionFactor);
-
 #ifdef SHADOW_MAP_PRESENT
-#ifdef TAA_ENABLED
-	// TODO: might as well apply unjitter to root shading eyePos?
-	vec2 uvJitter	   = taaJitter(v_invSize, frx_renderFrames);
-	vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
-	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(unjitteredPos.xyz / unjitteredPos.w, 1.0);
+	float denoisedShadowFactor(
+		sampler2DArrayShadow shadowMap,
+		vec2 texcoord,
+		vec3 eyePos,
+		float depth,
+		float lighty,
+		vec3 vertexNormal
+		)
+	{
+		// nasty
+		float transitionClamping = l2_clampScale(0.0, 0.1, frx_skyLightTransitionFactor);
+		vec3 adjustedEyePos = eyePos;
+
+		#ifdef TAA_ENABLED
+		{
+			// TODO: might as well apply unjitter to root shading eyePos?
+			vec2 uvJitter	   = taaJitter(v_invSize, frx_renderFrames);
+			vec4 unjitteredPos = frx_inverseViewProjectionMatrix * vec4(2.0 * texcoord - uvJitter - 1.0, 2.0 * depth - 1.0, 1.0);
+			adjustedEyePos = unjitteredPos.xyz / unjitteredPos.w;
+		}
+		#endif
+
+		vec4 shadowViewPos = frx_shadowViewMatrix * vec4(adjustedEyePos, 1.0);
+		float val = calcShadowFactor(shadowMap, shadowViewPos, vertexNormal);
+
+		// shadow workaround is dead. long live shadow workaround
+		// #ifdef SHADOW_WORKAROUND
+		// 	val *= l2_clampScale(0.03125, 0.04, lighty);
+		// #endif
+
+		return val * transitionClamping;
+	}
 #else
-	vec4 shadowViewPos = frx_shadowViewMatrix * vec4(eyePos, 1.0);
+	float noShadowLightFactor(float lighty) {
+		// nasty
+		float transitionClamping = l2_clampScale(0.0, 0.1, frx_skyLightTransitionFactor);
+		return lighty * lighty * transitionClamping;
+	}
 #endif
-
-	float val = calcShadowFactor(shadowMap, shadowViewPos, vertexNormal);
-
-	// shadow workaround is dead. long live shadow workaround
-// #ifdef SHADOW_WORKAROUND
-// 	val *= l2_clampScale(0.03125, 0.04, lighty);
-// #endif
-
-	return val * transitionClamping;
-#else
-	return lighty * lighty * transitionClamping;
-#endif
-}
 
 vec4 premultBlend(vec4 src, vec4 dst)
 {
@@ -393,8 +407,30 @@ vec4 particleShading(vec4 color, sampler2D natureTexture, vec4 light, vec3 eyePo
 	return vec4(shaded / PI, color.a);
 }
 
-vec4 shading(vec4 color, sampler2D natureTexture, vec4 light, vec3 rawMat, vec3 eyePos, vec3 normal, vec3 vertexNormal, bool isUnderwater, float disableDiffuse) {
-	return shading(color, natureTexture, light, rawMat.z, rawMat.xy, eyePos, normal, vertexNormal, isUnderwater, disableDiffuse);
+vec4 shading(
+	vec4 color,
+	sampler2D natureTexture,
+	vec4 light,
+	vec3 rawMat,
+	vec3 eyePos,
+	vec3 normal,
+	vec3 vertexNormal,
+	bool isUnderwater,
+	float disableDiffuse
+	)
+{
+	return shading(
+		color,
+		natureTexture,
+		light,
+		rawMat.z,
+		rawMat.xy,
+		eyePos,
+		normal,
+		vertexNormal,
+		isUnderwater,
+		disableDiffuse
+		);
 }
 #endif
 #endif

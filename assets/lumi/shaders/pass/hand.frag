@@ -14,7 +14,10 @@ uniform sampler2D u_vanilla_depth;
 
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_lightnormal;
+
+#ifdef SHADOW_MAP_PRESENT
 uniform sampler2DArrayShadow u_gbuffer_shadow;
+#endif
 
 uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
@@ -35,7 +38,22 @@ void main()
 		vec3 eyePos  = tempPos.xyz / tempPos.w;
 		vec4 light	= texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_LIGT));
 		vec3 vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_NORM)).xyz);
-		light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dSolid, light.y, vertexNormal);
+
+		#ifdef SHADOW_MAP_PRESENT
+		{
+			light.w = denoisedShadowFactor(
+				u_gbuffer_shadow,
+				v_texcoord,
+				eyePos,
+				dSolid,
+				light.y,
+				vertexNormal);
+		}
+		#else
+		{
+			light.w = noShadowLightFactor(light.y);
+		}
+		#endif
 
 		vec3 rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_SOLID_MATS)).xyz;
 		vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_SOLID_MNORM)).xyz);

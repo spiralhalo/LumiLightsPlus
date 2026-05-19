@@ -24,7 +24,10 @@ uniform sampler2D u_entity_hitbox_depth;
 
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_lightnormal;
+
+#ifdef SHADOW_MAP_PRESENT
 uniform sampler2DArrayShadow u_gbuffer_shadow;
+#endif
 
 uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
@@ -46,7 +49,41 @@ void main()
 	float idMicroNormal = (albedo.a == 0.0 || dTrans > dMin) ? ID_SOLID_MNORM : ID_TRANS_MNORM;
 
 	if (notEndPortal(u_gbuffer_lightnormal) || albedo.a == 0.0) {
-		fragColor += reflection(albedo.rgb, u_color_result, u_gbuffer_main_etc, u_gbuffer_lightnormal, u_translucent_depth, u_gbuffer_shadow, u_tex_nature, u_resources, idLight, idMaterial, idNormal, idMicroNormal);
+		vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dTrans - 1.0, 1.0);
+		vec3 eyePos  = tempPos.xyz / tempPos.w;
+		vec3 rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, idMaterial)).xyz;
+		vec3 vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, idNormal)).xyz);
+		vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, idMicroNormal)).xyz);
+		vec4 light	= texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight));
+		#ifdef SHADOW_MAP_PRESENT
+		{
+			light.w = denoisedShadowFactor(
+				u_gbuffer_shadow,
+				v_texcoord,
+				eyePos,
+				dTrans,
+				light.y,
+				vertexNormal);
+		}
+		#else
+		{
+			light.w = noShadowLightFactor(light.y);
+		}
+		#endif
+
+		fragColor += reflection(
+			albedo.rgb,
+			u_color_result,
+			u_gbuffer_main_etc,
+			u_translucent_depth,
+			u_tex_nature,
+			u_resources,
+			rawMat,
+			eyePos,
+			vertexNormal,
+			normal,
+			light
+			);
 	}
 
 	vec4 trans = texture(u_color_others, vec3(v_texcoord, ID_OTHER_TRANS));
@@ -64,8 +101,33 @@ void main()
 	float distToEye = length(eyePos);
 	vec4 skyBasic = basicSky(toFrag, skyBase(toFrag, frx_vanillaClearColor));
 	if (dMin < 1) {
+		vec4 fogged;
+		
+		#ifdef SHADOW_MAP_PRESENT
+		{
+			fogged = volumetricFog(
+				u_gbuffer_shadow,
+				u_tex_nature,
+				fragColor,
+				distToEye,
+				toFrag,
+				texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y,
+				getRandomFloat(u_resources, v_texcoord, frxu_size),
+				dMin,
+				frx_cameraInWater == 1);
+		}
+		#else
+		{
+			fogged = fog(
+				fragColor,
+				distToEye,
+				toFrag,
+				frx_cameraInWater == 1);
+		}
+		#endif
+		
 		fragColor = mix(
-			volumetricFog(u_gbuffer_shadow, u_tex_nature, fragColor, distToEye, toFrag, texture(u_gbuffer_lightnormal, vec3(v_texcoord, idLight)).y, getRandomFloat(u_resources, v_texcoord, frxu_size), dMin, frx_cameraInWater == 1),
+			fogged,
 			skyBasic,
 			edgeBlendFactor(distToEye));
 	}

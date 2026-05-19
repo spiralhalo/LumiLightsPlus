@@ -52,8 +52,6 @@ vec3 clipNear(vec3 end, vec3 start, float nearZ)
 
 vec3 reflectionMarch_v2(
 	sampler2D depthBuffer,
-	sampler2DArray lightNormalBuffer,
-	float idNormal,
 	vec3 viewStartPos,
 	vec3 viewMarch,
 	float nearZ
@@ -127,28 +125,16 @@ vec4 reflection(
 	vec3 albedo,
 	sampler2D colorBuffer,
 	sampler2DArray mainEtcBuffer,
-	sampler2DArray lightNormalBuffer,
 	sampler2D depthBuffer,
-	sampler2DArrayShadow shadowMap,
 	sampler2D natureTexture,
 	sampler2DArray resources,
-	float idLight,
-	float idMaterial,
-	float idNormal,
-	float idMicroNormal
+	vec3 rawMat,
+	vec3 eyePos,
+	vec3 vertexNormal,
+	vec3 normal,
+	vec4 light
 	)
 {
-	vec3 rawMat = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
-
-	vec4 light	= texture(lightNormalBuffer, vec3(v_texcoord, idLight));
-	vec3 normal	= normalize(texture(lightNormalBuffer, vec3(v_texcoord, idMicroNormal)).xyz);
-	float depth	= texture(depthBuffer, v_texcoord).r;
-
-	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth - 1.0, 1.0);
-	vec3 eyePos  = tempPos.xyz / tempPos.w;
-	vec3 vertexNormal = normalize(texture(lightNormalBuffer, vec3(v_texcoord, idNormal)).xyz);
-	light.w = denoisedShadowFactor(shadowMap, v_texcoord, eyePos, depth, light.y, vertexNormal);
-
 	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
 	float roughness = rawMat.x;
 
@@ -186,7 +172,7 @@ vec4 reflection(
 		float startJitter = getRandomFloat(resources, v_texcoord, frxu_size) * mix(0.2, 1.0, roughness);
 		vec3 viewStartPos = viewPos + viewMarch * startJitter;
 
-		vec3 result = reflectionMarch_v2(depthBuffer, lightNormalBuffer, idNormal, viewStartPos, viewMarch, nearPos.z);
+		vec3 result = reflectionMarch_v2(depthBuffer, viewStartPos, viewMarch, nearPos.z);
 
 		vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, viewVertexNormal.z) * 0.024, abs(result.xy - 0.5));
 		result.z *= min(uvFade.x, uvFade.y);
@@ -218,7 +204,16 @@ vec4 reflection(
 	vec3 baseReflection = envLight + mix(skyLight, objLight.rgb, objLight.a);
 
 	#ifdef VOLUMETRIC_CLOUDS
-	vec4 clouds = customClouds(natureTexture, natureTexture, resources, depth, v_texcoord, cloudPos, march, NUM_SAMPLE / 2, vec4(skyLight, 1.0));
+	vec4 clouds = customClouds(
+		natureTexture,
+		natureTexture,
+		resources,
+		texture(depthBuffer, v_texcoord).r,
+		v_texcoord,
+		cloudPos,
+		march,
+		NUM_SAMPLE / 2,
+		vec4(skyLight, 1.0));
 	baseReflection = mix(baseReflection, clouds.rgb, clouds.a * float(frx_worldIsOverworld));
 	#endif
 

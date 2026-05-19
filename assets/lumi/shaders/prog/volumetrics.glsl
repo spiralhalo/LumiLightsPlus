@@ -11,24 +11,36 @@
 
 #define RAYS_MIN_DIST 32
 
-#ifndef VERTEX_SHADER
-float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureTexture, float distToEye, vec3 toFrag, float lighty, float tileJitter, float depth, bool isUnderwater)
+#if !defined(VERTEX_SHADER) && defined(SHADOW_MAP_PRESENT)
+float celestialLightRays(
+	sampler2DArrayShadow shadowBuffer,
+	sampler2D natureTexture,
+	float distToEye,
+	vec3 toFrag,
+	float lighty,
+	float tileJitter,
+	float depth,
+	bool isUnderwater
+	)
 {
-	if (frx_worldHasSkylight == 0) return 1.0;
+	#ifndef VOLUMETRIC_FOG
+	{
+		// there is no point
+		return 1.0;
+	}
+	#endif
+
+	if (frx_worldHasSkylight == 0)
+	{
+		return 1.0;
+	}
 
 	bool doUnderwaterRays = frx_cameraInWater == 1 && isUnderwater;
-	float UWRays = float(doUnderwaterRays);
-
-#if !defined(SHADOW_MAP_PRESENT) || !defined(VOLUMETRIC_FOG)
-	// there is no point
-	// if (!doUnderwaterRays) {
-		return 1.0;
-	// }
-#endif
+	// float UWRays = float(doUnderwaterRays);
 
 	float scatter = 1.0;
 
-// #ifdef SHADOW_WORKAROUND
+	// #ifdef SHADOW_WORKAROUND
 	// This is very awkward.. I hope shadows will get better soon
 	float maximize = step(1.0, depth);
 	maximize = max(maximize, float(isUnderwater));
@@ -36,9 +48,10 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 	scatter *= max(maximize, lightmapRemap(lighty));
 	// shadow workaround is dead. long live shadow workaround
 	// scatter *= max(maximize, l2_clampScale(0.03125, 0.0625, lighty));
-// #endif
+	// #endif
 
-	if (scatter <= 0.0) {
+	if (scatter <= 0.0)
+	{
 		return 0.0;
 	}
 
@@ -56,7 +69,8 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 	float energy = 0.0;
 	int steps = 0;
 
-	while (steps < MAX_STEPS) {
+	while (steps < MAX_STEPS)
+	{
 		float e = 1.0;
 
 		// DISABLED because need a different caustics function that respects light direction
@@ -65,10 +79,8 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 		// 	e *= pow(caustics(natureTexture, ray + frx_cameraPos, 1.0), 30.0);
 		// }
 
-		#ifdef SHADOW_MAP_PRESENT
 		vec4 shadowRay = (frx_shadowViewMatrix * vec4(ray, 1.0));
 		e *= simpleShadowFactor(shadowBuffer, shadowRay);
-		#endif
 
 		// doesn't look good unless we can sample sky light volume
 		// #ifdef WATER_CAUSTICS
@@ -83,7 +95,8 @@ float celestialLightRays(sampler2DArrayShadow shadowBuffer, sampler2D natureText
 
 	energy = (energy / float(MAX_STEPS)) * scatter;
 
-	if (doUnderwaterRays) {
+	if (doUnderwaterRays)
+	{
 		// have you heard of HDR fog?
 		energy = 1.0 + energy;
 	}

@@ -26,7 +26,10 @@ uniform sampler2D u_particles_depth;
 uniform sampler2DArray u_gbuffer_trans;
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_lightnormal;
+
+#ifdef SHADOW_MAP_PRESENT
 uniform sampler2DArrayShadow u_gbuffer_shadow;
+#endif
 
 uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
@@ -74,7 +77,21 @@ void main()
 	vec3 solidPos = eyePos;
 	float solidNormaly = vertexNormal.y;
 
-	light.w = denoisedShadowFactor(u_gbuffer_shadow, uvSolid, eyePos, dSolid, light.y, vertexNormal);
+	#ifdef SHADOW_MAP_PRESENT
+	{
+		light.w = denoisedShadowFactor(
+			u_gbuffer_shadow,
+			uvSolid,
+			eyePos,
+			dSolid,
+			light.y,
+			vertexNormal);
+	}
+	#else
+	{
+		light.w = noShadowLightFactor(light.y);
+	}
+	#endif
 
 	vec3 miscSolid = texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MISC)).xyz;
 	vec3 miscTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
@@ -119,7 +136,24 @@ void main()
 	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dParts - 1.0, 1.0);
 	eyePos  = tempPos.xyz / tempPos.w;
 	light = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_PARTS_LIGT));
-	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dParts, light.y, -frx_cameraView);
+
+
+	#ifdef SHADOW_MAP_PRESENT
+	{
+		light.w = denoisedShadowFactor(
+			u_gbuffer_shadow,
+			v_texcoord,
+			eyePos,
+			dParts,
+			light.y,
+			-frx_cameraView);
+	}
+	#else
+	{
+		light.w = noShadowLightFactor(light.y);
+	}
+	#endif
+
 	vec4 nextParts = particleShading(cParts, u_tex_nature, light, eyePos, decideUnderwater(dParts, dTrans, transIsWater, false));
 
 	vec4 nextTrans;
@@ -130,7 +164,22 @@ void main()
 	eyePos  = tempPos.xyz / tempPos.w;
 	light   = lTrans;
 	vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).xyz);
-	light.w = denoisedShadowFactor(u_gbuffer_shadow, v_texcoord, eyePos, dTrans, light.y, vertexNormal);
+
+	#ifdef SHADOW_MAP_PRESENT
+	{
+		light.w = denoisedShadowFactor(
+			u_gbuffer_shadow,
+			v_texcoord,
+			eyePos,
+			dTrans,
+			light.y,
+			vertexNormal);
+	}
+	#else
+	{
+		light.w = noShadowLightFactor(light.y);
+	}
+	#endif
 
 	if (transIsManaged) {
 		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy, vertexNormal) * cTrans.a);

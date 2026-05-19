@@ -1,0 +1,10 @@
+{
+	"defaultMap": {
+		"spriteMap": [
+			{
+				"sprite": "minecraft:block/short_grass",
+				"material": "lumi:grass"
+			}
+		]
+	}
+}

@@ -1,3 +1,5 @@
+#include frex:shaders/api/fog.glsl
+
 #include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/prog/volumetrics.glsl
 
@@ -60,17 +62,23 @@ float fullFogFactor(float distToEye, vec3 toFrag, bool isUnderwater, float visib
 	// only when absolutely underwater
 	bool submerged = isUnderwater && frx_cameraInFluid == 1;
 
-	float pFogDensity = submerged ? (FOG_DENSITY * 2.0) : FOG_DENSITY;
-	float pFogFar     = submerged ? UNDERWATER_FOG_FAR  : FOG_FAR;
+	float pFogDensity = submerged ? (FOG_DENSITY * 1.5) : FOG_DENSITY;
+	float pFogFar     = submerged ? min(UNDERWATER_FOG_FAR, frx_fogEnd) : FOG_FAR;
 
-	if (!isUnderwater && frx_worldHasSkylight == 1) {
+	if (!isUnderwater && frx_worldHasSkylight == 1)
+	{
 		pFogFar *= visibility;
 		pFogDensity = mix(max(1.0, pFogDensity * 2.0), pFogDensity, visibility);
 	}
 
 	// resolve lava and snow
-	pFogFar = mix(pFogFar, max(0, frx_effectFireResistance - frx_playerIsFreezing) * 4.0 + 1.0, max(frx_cameraInSnow, frx_cameraInLava));
-	pFogDensity = max(pFogDensity, max(frx_cameraInSnow, frx_cameraInLava));
+	pFogFar = mix(
+		pFogFar,
+		max(0, frx_effectFireResistance - frx_playerIsFreezing) * 4.0 + 1.0,
+		max(frx_cameraInSnow, frx_cameraInLava));
+	pFogDensity = max(
+		pFogDensity,
+		max(frx_cameraInSnow, frx_cameraInLava));
 
 	float distFactor = min(1.0, distToEye / pFogFar);
 	distFactor = l2_softenUp(distFactor, pFogDensity * 2.0);

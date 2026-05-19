@@ -1,0 +1,14 @@
+{
+	"defaultMap": {
+		"spriteMap": [
+			{
+				"sprite": "minecraft:block/tall_grass_bottom",
+				"material": "lumi:grass"
+			},
+			{
+				"sprite": "minecraft:block/tall_grass_top",
+				"material": "lumi:grass_upper"
+			}
+		]
+	}
+}

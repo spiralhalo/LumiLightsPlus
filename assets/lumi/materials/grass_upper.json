@@ -1,0 +1,6 @@
+{
+	"vertexSource": "lumi:shaders/material/grass_upper.vert",
+	"depthVertexSource": "lumi:shaders/material/grass_upper.vert",
+	"disableAo": false,
+	"disableDiffuse": true
+}

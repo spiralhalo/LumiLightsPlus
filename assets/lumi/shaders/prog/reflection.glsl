@@ -50,7 +50,14 @@ vec3 clipNear(vec3 end, vec3 start, float nearZ)
 	return end;
 }
 
-vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer, float idNormal, vec3 viewStartPos, vec3 viewMarch, float nearZ)
+vec3 reflectionMarch_v2(
+	sampler2D depthBuffer,
+	sampler2DArray lightNormalBuffer,
+	float idNormal,
+	vec3 viewStartPos,
+	vec3 viewMarch,
+	float nearZ
+	)
 {
 	// padding to prevent back face reflection. we want the divisor to be as small as possible.
 	// too small with cause distortion of reflection near the reflector
@@ -116,7 +123,20 @@ vec3 reflectionMarch_v2(sampler2D depthBuffer, sampler2DArray lightNormalBuffer,
 
 const float JITTER_STRENGTH = 0.6;
 
-vec4 reflection(vec3 albedo, sampler2D colorBuffer, sampler2DArray mainEtcBuffer, sampler2DArray lightNormalBuffer, sampler2D depthBuffer, sampler2DArrayShadow shadowMap, sampler2D natureTexture, sampler2DArray resources, float idLight, float idMaterial, float idNormal, float idMicroNormal)
+vec4 reflection(
+	vec3 albedo,
+	sampler2D colorBuffer,
+	sampler2DArray mainEtcBuffer,
+	sampler2DArray lightNormalBuffer,
+	sampler2D depthBuffer,
+	sampler2DArrayShadow shadowMap,
+	sampler2D natureTexture,
+	sampler2DArray resources,
+	float idLight,
+	float idMaterial,
+	float idNormal,
+	float idMicroNormal
+	)
 {
 	vec3 rawMat = texture(mainEtcBuffer, vec3(v_texcoord, idMaterial)).xyz;
 

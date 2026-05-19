@@ -12,8 +12,6 @@
 	"config.lumi_lights.help.shadow_angle": "Zenith angle of the sun and moon. Affects shadow length and angle",
 	"config.lumi_lights.value.filter_shadows": "Shadow smoothing",
 	"config.lumi_lights.help.filter_shadows": "Smoother shadows",
-	"config.lumi_lights.value.name_tag_shadow": "Name tag shadow",
-	"config.lumi_lights.help.name_tag_shadow": "Render name tag shadow",
 
 	"config.lumi_lights.category.lighting": "Lighting",
 	"config.lumi_lights.value.outdoors_brightness": "Sun light brightness",

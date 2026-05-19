@@ -4,7 +4,7 @@
 		"predicate": {
 			"materialPredicate": {
 					"renderLayerName": "eyes",
-					"texture": "minecraft:textures/entity/phantom/phantom_eyes.png"
+					"texture": "minecraft:textures/entity/breeze/breeze_eyes.png"
 			}
 		},
 		"material": "lumi:tasty_eyeballs"

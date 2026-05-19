@@ -179,7 +179,7 @@ void atmos_generateAtmosphereModel()
 		atmosv_FogRadiance = vanillaFogRadiance;
 	}
 
-	atmosv_WaterFogRadiance = vanillaFogRadiance;
+	atmosv_WaterFogRadiance = 0.7 * vanillaFogRadiance / lightLuminance(vanillaFogRadiance);
 	atmosv_WaterFogRadiance.g = max(atmosv_WaterFogRadiance.g, atmosv_WaterFogRadiance.b * 0.15);
 
 	// prevent custom overworld sky reflection in non-overworld dimension or when the sky mode is not Lumi

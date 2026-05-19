@@ -1,0 +1,37 @@
+{
+ 	"map": [
+		{
+			"predicate": {
+				"materialPredicate": {
+						"renderLayerName": "eyes",
+						"texture": "minecraft:textures/entity/copper_golem/copper_golem_eyes.png"
+				}
+			},
+			"material": "lumi:tasty_eyeballs"
+		},
+		{
+			"predicate": {
+				"materialPredicate": {
+						"texture": "minecraft:textures/entity/copper_golem/copper_golem_eyes_exposed.png"
+				}
+			},
+			"material": "lumi:tasty_eyeballs"
+		},
+		{
+			"predicate": {
+				"materialPredicate": {
+						"texture": "minecraft:textures/entity/copper_golem/copper_golem_eyes_oxidized.png"
+				}
+			},
+			"material": "lumi:tasty_eyeballs"
+		},
+		{
+			"predicate": {
+				"materialPredicate": {
+						"texture": "minecraft:textures/entity/copper_golem/copper_golem_eyes_weathered.png"
+				}
+			},
+			"material": "lumi:tasty_eyeballs"
+		}
+	]
+}

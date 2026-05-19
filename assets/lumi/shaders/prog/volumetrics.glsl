@@ -97,8 +97,7 @@ float celestialLightRays(
 
 	if (doUnderwaterRays)
 	{
-		// have you heard of HDR fog?
-		energy = 1.0 + energy;
+		energy = energy * 0.5 + 0.5;
 	}
 
 	return energy;

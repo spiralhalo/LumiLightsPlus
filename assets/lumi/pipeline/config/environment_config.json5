@@ -104,16 +104,16 @@
 			categoryKey: "config.lumi_lights.category.fog",
 			options: {
 				fog_far_chunks: {
-					default: 16,
+					default: 32,
 					min: 0,
-					max: 32,
+					max: 64,
 					nameKey: "config.lumi_lights.value.fog_far_chunks",
 					descriptionKey: "config.lumi_lights.help.fog_far_chunks"
 				},
 				underwater_fog_far_chunks: {
-					default: 8,
+					default: 16,
 					min: 0,
-					max: 32,
+					max: 64,
 					nameKey: "config.lumi_lights.value.underwater_fog_far_chunks",
 					descriptionKey: "config.lumi_lights.help.underwater_fog_far_chunks"
 				},

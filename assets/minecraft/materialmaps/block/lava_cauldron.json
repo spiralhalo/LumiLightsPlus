@@ -4,7 +4,7 @@
 		"spriteMap": [
 			{
 				"sprite": "minecraft:block/lava_still",
-				"material": "canvas:emissive_no_diffuse"
+				"material": "lumi:emissive"
 			}
 		]
 	}

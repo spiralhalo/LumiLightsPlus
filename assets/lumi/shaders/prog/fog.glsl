@@ -63,8 +63,8 @@ float fullFogFactor(float distToEye, vec3 toFrag, bool isUnderwater, float visib
 	// only when absolutely underwater
 	bool submerged = isUnderwater && frx_cameraInFluid == 1;
 
-	float pFogDensity = submerged ? (FOG_DENSITY * 1.5) : FOG_DENSITY;
-	float pFogFar     = submerged ? min(UNDERWATER_FOG_FAR, frx_fogEnd) : FOG_FAR;
+	float pFogDensity = FOG_DENSITY;
+	float pFogFar     = submerged ? UNDERWATER_FOG_FAR : FOG_FAR;
 
 	if (!isUnderwater && frx_worldHasSkylight == 1)
 	{

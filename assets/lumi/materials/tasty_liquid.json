@@ -1,6 +1,5 @@
 {
 	"blendMode": "translucent",
 	"disableAo": true,
-	"vertexSource": "lumi:shaders/material/noop.vert",
 	"fragmentSource": "lumi:shaders/material/water.frag"
 }

@@ -1,5 +1,4 @@
 {
-	"vertexSource": "lumi:shaders/material/noop.vert",
 	"fragmentSource": "lumi:shaders/material/glow.frag",
 	"emissive": true,
 	"transform": true

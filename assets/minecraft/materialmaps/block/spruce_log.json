@@ -1,6 +1,5 @@
 {
 	"defaultMap": {
-		"defaultMaterial": "fabric:standard",
 		"spriteMap": [
 			{
 				"sprite": "minecraft:block/spruce_log",

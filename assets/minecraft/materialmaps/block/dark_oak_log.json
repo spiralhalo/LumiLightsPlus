@@ -1,6 +1,5 @@
 {
 	"defaultMap": {
-		"defaultMaterial": "fabric:standard",
 		"spriteMap": [
 			{
 				"sprite": "minecraft:block/dark_oak_log",

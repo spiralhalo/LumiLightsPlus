@@ -59,6 +59,7 @@
 		const float[SKY_LEN] SKY_NIGHT = float[]( 1.0 , 0.0 , 0.0 , 1.0);
 		const float[SKY_LEN] SKY_TIMES = float[](-0.05, 0.05, 0.45, 0.55);
 
+		float worldHasAtmosphere = float(frx_worldHasSkylight) * float(1 - frx_worldIsEnd);
 
 		float moonlightSize = 0.3 + 0.7 * frx_moonSize;
 		float moonlightStrength = DEF_MOONLIGHT_STR * moonlightSize;
@@ -87,12 +88,19 @@
 			#endif
 		}
 
-		atmosv_OWTwilightFactor *= float(frx_worldHasSkylight);// * (1.0 - frx_worldIsMoonlit);
+		atmosv_OWTwilightFactor *= worldHasAtmosphere;// * (1.0 - frx_worldIsMoonlit);
 
 		sunColor.gb *= vec2(frx_skyLightTransitionFactor * frx_skyLightTransitionFactor);
 
 		// if editing this, also edit nightFogLuminance for cave fog
-		atmosv_CelestialRadiance = mix(sunColor * DEF_SUNLIGHT_STR, MOONLIGHT_COLOR * moonlightStrength, frx_worldIsMoonlit) * frx_skyLightTransitionFactor;
+		atmosv_CelestialRadiance = frx_skyLightTransitionFactor * mix(
+			sunColor * DEF_SUNLIGHT_STR,
+			MOONLIGHT_COLOR * moonlightStrength,
+			frx_worldIsMoonlit
+		);
+
+		// TODO parametrize
+		atmosv_CelestialRadiance = mix(vec3(0.5), atmosv_CelestialRadiance, worldHasAtmosphere);
 
 
 		float nightFactor = SKY_NIGHT[0];
@@ -104,7 +112,7 @@
 			nightFactor = mix(SKY_NIGHT[skyI-1], SKY_NIGHT[skyI], skyTransition);
 		}
 
-		atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT * moonlightSize, nightFactor) * (frx_worldHasSkylight == 1 ? 1.0 : 0.0);
+		atmosv_SkyAmbientRadiance = mix(NOON_AMBIENT, NIGHT_AMBIENT * moonlightSize, nightFactor) * worldHasAtmosphere;
 
 		#ifdef POST_SHADER
 		// if editing this, also edit nightFogLuminance for cave fog
@@ -185,7 +193,8 @@
 		atmosv_eyeAdaptation = frx_smoothedEyeBrightness.y * lightLuminance(atmosv_CelestialRadiance) * (1. - frx_rainGradient);
 
 		//  NB: mustn't affect cave fog
-		if (frx_worldHasSkylight == 1) {
+		if (worldHasAtmosphere == 1.0)
+		{
 			float skyAdaptor = 1.0 / (0.33 + 0.67 * max(frx_smoothedEyeBrightness.y, max(frx_rainGradient, 1.0 - lightLuminance(atmosv_CelestialRadiance))));
 			atmosv_SkyRadiance *= skyAdaptor;
 			atmosv_CelestialRadiance *= skyAdaptor;

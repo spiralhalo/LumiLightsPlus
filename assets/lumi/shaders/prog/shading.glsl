@@ -22,10 +22,10 @@
 	float fastLight(vec2 light, vec3 normal) {
 		float reduction = max(1.0 - frx_skyLightTransitionFactor, frx_worldIsMoonlit);
 			reduction = max(reduction, max(0.5 * frx_rainGradient, frx_thunderGradient));
-
+		float worldHasAtmosphere = float(frx_worldHasSkylight) * float(1 - frx_worldIsEnd);
 		float sun = 0.6 * max(0.0, dot(normal, frx_skyLightVector)) * (1.0 - 0.9 * reduction);
-		float blockFactor = 1.0 - 0.8 * frx_worldHasSkylight * frx_smoothedEyeBrightness.y;
-		float result = (light.x * blockFactor + light.y * (0.4 + mix(0.6, sun, frx_worldHasSkylight)) * (1.0 - blockFactor));
+		float blockFactor = 1.0 - 0.8 * worldHasAtmosphere * frx_smoothedEyeBrightness.y;
+		float result = (light.x * blockFactor + light.y * (0.4 + mix(0.6, sun, worldHasAtmosphere)) * (1.0 - blockFactor));
 
 		// prevents overblown values when recovering the original as well as representing ambient light
 		return 0.2 + 0.8 * result;
@@ -209,7 +209,8 @@
 			float causticLight = 0.0;
 
 		#if defined(WATER_CAUSTICS) && defined(POST_SHADER)
-			if (isUnderwater && frx_worldHasSkylight == 1) {
+			if (isUnderwater && frx_worldHasSkylight == 1 && frx_worldIsEnd == 0)
+			{
 				causticLight  = caustics(natureTexture, eyePos + frx_cameraPos, vertexNormaly);
 				causticLight *= 2.0;
 				causticLight *= smoothstep(0.0, 1.0, light.y);
@@ -247,7 +248,8 @@
 
 			vec3 skylessColor = SKYLESS_LIGHT_COLOR * mix(USER_END_AMBIENT_MULTIPLIER, USER_NETHER_AMBIENT_MULTIPLIER * 0.25, frx_worldIsNether);
 
-			baseLight += (1.0 - frx_worldHasSkylight) * skylessColor * SKYLESS_AMBIENT_STR;
+			float worldHasAtmosphere = float(frx_worldHasSkylight) * float(1 - frx_worldIsEnd);
+			baseLight += (1.0 - worldHasAtmosphere) * skylessColor * SKYLESS_AMBIENT_STR;
 
 			// user brightness afects every base ambient except for sky ambient (emissive isn't ambient)
 			baseLight *= userBrightness;

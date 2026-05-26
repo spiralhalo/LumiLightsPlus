@@ -47,7 +47,7 @@ float fullFogFactor(float distToEye, vec3 toFrag, bool isUnderwater, float visib
 	float pFogDensity = FOG_DENSITY;
 	float pFogFar     = submerged ? UNDERWATER_FOG_FAR : FOG_FAR;
 
-	if (!isUnderwater && frx_worldHasSkylight == 1)
+	if (!isUnderwater && frx_worldHasSkylight == 1 && frx_worldIsEnd == 0)
 	{
 		pFogFar *= visibility;
 		pFogDensity = mix(max(1.0, pFogDensity * 2.0), pFogDensity, visibility);

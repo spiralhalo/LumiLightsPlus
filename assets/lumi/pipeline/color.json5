@@ -65,7 +65,7 @@
 		{
 			name: "color",
 			vertexSource: "lumi:shaders/pass/shading.vert",
-			fragmentSource: "lumi:shaders/pass/color.frag",
+			fragmentSource: "lumi:shaders/pass/fabulous/color.frag",
 			samplers: [
 				"u_vanilla_color",
 				"u_vanilla_depth",
@@ -88,7 +88,7 @@
 		{
 			name: "hand",
 			vertexSource: "lumi:shaders/pass/shading.vert",
-			fragmentSource: "lumi:shaders/pass/hand.frag",
+			fragmentSource: "lumi:shaders/pass/after_render_hand/hand.frag",
 			samplers: [
 				"u_vanilla_color",
 				"u_vanilla_depth",
@@ -103,8 +103,8 @@
 		},
 		{
 			name: "ao",
-			vertexSource: "lumi:shaders/pass/ao.glsl",
-			fragmentSource: "lumi:shaders/pass/ao.glsl",
+			vertexSource: "lumi:shaders/pass/fabulous/ao.glsl",
+			fragmentSource: "lumi:shaders/pass/fabulous/ao.glsl",
 			samplers: [
 				"u_vanilla_depth",
 				"u_gbuffer_lightnormal",
@@ -115,7 +115,7 @@
 		{
 			name: "ao0",
 			vertexSource: "lumi:shaders/pass/basic.vert",
-			fragmentSource: "lumi:shaders/pass/ao0.frag",
+			fragmentSource: "lumi:shaders/pass/fabulous/ao0.frag",
 			samplers: [
 				"u_gbuffer_main_etc",
 			]
@@ -123,7 +123,7 @@
 		{
 			name: "ao_final",
 			vertexSource: "lumi:shaders/pass/basic.vert",
-			fragmentSource: "lumi:shaders/pass/ao2.frag",
+			fragmentSource: "lumi:shaders/pass/fabulous/ao2.frag",
 			samplers: [
 				"u_view_z",
 				"u_gbuffer_main_etc_copy",
@@ -134,7 +134,7 @@
 		{
 			name: "depth_process",
 			vertexSource: "lumi:shaders/pass/basic.vert",
-			fragmentSource: "lumi:shaders/pass/depth.frag",
+			fragmentSource: "lumi:shaders/pass/fabulous/depth.frag",
 			samplers: [
 				"u_vanilla_depth",
 			]

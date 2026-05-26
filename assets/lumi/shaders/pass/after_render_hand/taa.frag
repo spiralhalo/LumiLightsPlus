@@ -34,7 +34,8 @@ vec4 clipAABB(vec3 colorMin, vec3 colorMax, vec4 currentColor, vec4 previousColo
 	}
 }
 
-vec3 calcPrevNdc(vec3 currentNdc) {
+vec3 calcPrevNdc(vec3 currentNdc)
+{
 	vec4 temp = frx_inverseViewProjectionMatrix * vec4(currentNdc, 1.0);
 	vec3 currentPos = temp.xyz / temp.w;
 
@@ -45,18 +46,24 @@ vec3 calcPrevNdc(vec3 currentNdc) {
 	return temp.xyz / temp.w;
 }
 
-vec2 calcPrevUv(sampler2D depthBuffer, vec2 currentUv) {
+vec2 calcPrevUv(sampler2D depthBuffer, vec2 currentUv)
+{
 	vec2 ndcJitter	   = taaJitter(v_invSize, frx_renderFrames);
 	vec2 prevNdcJitter = taaJitter(v_invSize, frx_renderFrames - 1u);
 
 	float depth = texture(depthBuffer, currentUv).r;
 	vec2 prevUv = (calcPrevNdc(vec3(currentUv * 2.0 - 1.0 - ndcJitter, depth * 2.0 - 1.0)).xy + prevNdcJitter) * 0.5 + 0.5;
 
-	if (prevUv != clamp(prevUv, 0.0, 1.0)) return currentUv; // out of bounds
+	if (prevUv != clamp(prevUv, 0.0, 1.0))
+	{
+		return currentUv; // out of bounds
+	}
+
 	return prevUv;
 }
 
-float velocityWeight(sampler2D depthBuffer, vec2 currentUv) {
+float velocityWeight(sampler2D depthBuffer, vec2 currentUv)
+{
 	float depth = texture(depthBuffer, currentUv).r;
 	vec2 prevUv = calcPrevNdc(vec3(currentUv * 2.0 - 1.0, depth * 2.0 - 1.0)).xy * 0.5 + 0.5;
 	return min(1.0, length((currentUv - prevUv) * frxu_size));
@@ -89,7 +96,8 @@ vec4 taa()
 
 	vec3 minColor0 = currentColor.rgb;
 	vec3 maxColor0 = currentColor.rgb;
-	for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < 8; i++)
+	{
 		vec3 sampled = texture(u_current, v_texcoord + box[i] * v_invSize).rgb;
 		minColor0 = min(minColor0, sampled);
 		maxColor0 = max(maxColor0, sampled);
@@ -97,7 +105,8 @@ vec4 taa()
 
 	vec3 minColor1 = currentColor.rgb;
 	vec3 maxColor1 = currentColor.rgb;
-	for(int i = 0; i < 4; i++) {
+	for(int i = 0; i < 4; i++)
+	{
 		vec3 sampled = texture(u_current, v_texcoord + plus[i] * v_invSize).rgb;
 		minColor1 = min(minColor1, sampled);
 		maxColor1 = max(maxColor1, sampled);
@@ -131,9 +140,12 @@ void main()
 
 #else
 
-	if (min(v_texcoord.x, v_texcoord.y) >= 0.75) {
+	if (min(v_texcoord.x, v_texcoord.y) >= 0.75)
+	{
 		fragColor = texture(u_current, v_texcoord * 4.0 - 3.0);
-	} else {
+	}
+	else
+	{
 		fragColor = vec4(velocityWeight(u_depthCurrent, v_texcoord));
 	}
 
@@ -152,9 +164,12 @@ void main()
 	bool skip = depth == 1. && frx_worldIsEnd == 1; // the end sky is noisy so don't apply TAA (note: true for vanilla)
 		 skip = skip || (isHand && (abs(velocity.x) > v_invSize.x || abs(velocity.y) > v_invSize.y));
 
-	if (skip) {
+	if (skip)
+	{
 		fragColor = texture(u_current, v_texcoord);
-	} else {
+	}
+	else
+	{
 		fragColor = taa();
 	}
 
@@ -167,7 +182,8 @@ void main()
 	const vec2 size = vec2(0.2 / 2.0, 0.06);
 	vec2 debugTextCoord = vec2(clamp(v_texcoord.x, 0.5 - size.x, 0.5 + size.x), clamp(v_texcoord.y, 1.0 - size.y, 1.0));
 
-	if (v_texcoord == debugTextCoord) {
+	if (v_texcoord == debugTextCoord)
+	{
 		debugTextCoord.x = l2_clampScale(0.5 - size.x, 0.5 + size.x, v_texcoord.x);
 		debugTextCoord.y = l2_clampScale(1.0, 1.0 - size.y, v_texcoord.y);
 

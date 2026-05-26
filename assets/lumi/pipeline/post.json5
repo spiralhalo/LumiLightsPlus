@@ -12,7 +12,7 @@
 		{
 			name: "post",
 			vertexSource: "lumi:shaders/pass/shading.vert",
-			fragmentSource: "lumi:shaders/pass/post.frag",
+			fragmentSource: "lumi:shaders/pass/fabulous/post.frag",
 			samplers: [
 				"u_color_result",
 				"u_color_depth",

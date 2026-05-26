@@ -3,7 +3,7 @@
 		{
 			name: "taa_program",
 			vertexSource: "lumi:shaders/pass/basic.vert",
-			fragmentSource: "lumi:shaders/pass/taa.frag",
+			fragmentSource: "lumi:shaders/pass/after_render_hand/taa.frag",
 			samplers: [
 				"u_current",
 				"u_history0",

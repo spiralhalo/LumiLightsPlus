@@ -22,6 +22,7 @@ const vec2 halton[4] = vec2[4](
 	);
 
 // jitter in ndc space, not image space
-vec2 taaJitter(vec2 rcpSize, uint frame) {
+vec2 taaJitter(vec2 rcpSize, uint frame)
+{
 	return halton[frame % 4u] * rcpSize;
 }

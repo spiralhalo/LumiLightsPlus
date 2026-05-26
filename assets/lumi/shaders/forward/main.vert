@@ -10,7 +10,7 @@
 /*******************************************************
  *  lumi:shaders/forward/main.vert
  *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo
+ *  Copyright (c) 2020-2022 spiralhalo
  *  Released WITHOUT WARRANTY under the terms of the
  *  GNU Lesser General Public License version 3 as
  *  published by the Free Software Foundation, Inc.

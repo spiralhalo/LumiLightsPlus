@@ -17,7 +17,7 @@
 /*******************************************************
  *  lumi:shaders/forward/main.frag
  *******************************************************
- *  Copyright (c) 2020-2021 spiralhalo
+ *  Copyright (c) 2020-2023 spiralhalo
  *  Released WITHOUT WARRANTY under the terms of the
  *  GNU Lesser General Public License version 3 as
  *  published by the Free Software Foundation, Inc.

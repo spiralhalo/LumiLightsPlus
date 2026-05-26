@@ -22,7 +22,7 @@
 		},
 		{
 			name: "color_others",
-			depth: 3,
+			depth: 2,
 			internalFormat: "RGBA8",
 			pixelFormat: "RGBA",
 			target: "TEXTURE_2D_ARRAY",
@@ -149,7 +149,6 @@
 				{image: "color_depth"},
 				{image: "color_others", layer: 0},
 				{image: "color_others", layer: 1},
-				{image: "color_others", layer: 2},
 			]
 		},
 		{

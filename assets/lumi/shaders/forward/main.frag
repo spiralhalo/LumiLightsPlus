@@ -34,7 +34,7 @@ layout(location = 1) out vec4 outLight;
 layout(location = 2) out vec4 outVertNormal;
 layout(location = 3) out vec4 outFragNormal;
 layout(location = 4) out vec4 outPbrMat;
-layout(location = 5) out vec4 outFlags;
+layout(location = 5) out vec4 outMisc;
 
 void frx_pipelineFragment()
 {
@@ -140,7 +140,7 @@ void frx_pipelineFragment()
 		outVertNormal = vec4(frx_vertexNormal, 1.0);
 		outFragNormal = vec4(frx_fragNormal, 1.0);
 		outPbrMat = vec4(roughness, frx_fragReflectance, ao, 1.0);
-		outFlags = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
+		outMisc = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 	}
 
 	// Advanced translucency 4.0

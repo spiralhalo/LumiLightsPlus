@@ -77,7 +77,10 @@ in vec2 v_invSize;
 #define ID_TRANS_MISC 3.
 
 #define ID_OTHER_ALBEDO 0.
-#define ID_OTHER_TRANS 1.
-#define ID_OTHER_AFTER 2.
+#define ID_OTHER_AFTER 1.
+
+#define ALBEDO_ALPHA_SOLID (1.0 / 255.0)
+#define ALBEDO_ALPHA_TRANSLUCENT (2.0 / 255.0)
+#define ALBEDO_ALPHA_UNMANAGED (1.0)
 
 #include lumi:shaders/common/resources.glsl

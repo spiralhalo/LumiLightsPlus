@@ -177,7 +177,10 @@ vec4 reflection(
 		vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, viewVertexNormal.z) * 0.024, abs(result.xy - 0.5));
 		result.z *= min(uvFade.x, uvFade.y);
 
-		vec4 reflectedPos = frx_inverseViewProjectionMatrix * vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);
+		vec4 reflectedPos = (
+			frx_inverseViewProjectionMatrix
+			* vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0)
+		);
 		reflectedPos.xyz /= reflectedPos.w;
 		float dist = length(reflectedPos.xyz);
 		float distanceFade = fogFactor(dist, march, frx_cameraInFluid == 1);

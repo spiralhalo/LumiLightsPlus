@@ -34,243 +34,387 @@ uniform sampler2DArrayShadow u_gbuffer_shadow;
 uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
 
-layout(location = 0) out vec4 fragColor;
-layout(location = 1) out float fragDepth;
-layout(location = 2) out vec4 fragAlbedo;
-layout(location = 3) out vec4 fragTrans;
+layout(location = 0) out vec4 out_color;
+layout(location = 1) out float out_depth;
+layout(location = 2) out vec4 out_albedo;
+layout(location = 3) out vec4 out_after;
 layout(location = 4) out vec4 fragAfter;
 
 void main()
 {
-	float dVanilla = texture(u_vanilla_depth, v_texcoord).r;
-	float dTrans = texture(u_translucent_depth, v_texcoord).r;
+	float depth_translucent = texture(u_translucent_depth, v_texcoord).r;
 
-	vec2 uvSolid = refractSolidUV(u_gbuffer_lightnormal, u_vanilla_depth, dVanilla, dTrans);
+	vec2 uv_solid_refracted = refractSolidUV(
+		u_gbuffer_lightnormal,
+		u_vanilla_depth,
+		texture(u_vanilla_depth,
+		v_texcoord).r,
+		depth_translucent);
 
-	float dSolid = texture(u_vanilla_depth, uvSolid).r;
+	float depth_solid = texture(u_vanilla_depth, uv_solid_refracted).r;
+	float depth_particles = texture(u_particles_depth, v_texcoord).r;
+	float depth_weather = texture(u_weather_depth, v_texcoord).r;
+	float MinimumDepth = min(depth_solid, min(depth_translucent, min(depth_particles, depth_weather)));
 
-	vec4  cSolid = texture(u_vanilla_color, uvSolid);
-	vec4  lTrans = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_LIGT));
-	vec4  cTrans = texture(u_gbuffer_trans, vec3(v_texcoord, ID_TRANS_COLR));
-	float dParts = texture(u_particles_depth, v_texcoord).r;
-	vec4  cParts = texture(u_gbuffer_trans, vec3(v_texcoord, ID_PARTS_COLR));
-	float dRains = texture(u_weather_depth, v_texcoord).r;
-	vec4  cRains = texture(u_weather_color, v_texcoord);
-
-	cParts.rgb /= cParts.a == 0.0 ? 1.0 : cParts.a;
-	cRains.rgb /= cRains.a == 0.0 ? 1.0 : cRains.a;
-	// cRains.rgb = frx_worldIsOverworld == 1 ? vec3(lightLuminance(cRains.rgb)) : cRains.rgb;
-	cTrans = dSolid < dTrans ? vec4(0.0) : cTrans;
-	cParts = dSolid < dParts ? vec4(0.0) : cParts;
-	cRains = dSolid < dRains ? vec4(0.0) : cRains;
-	cRains.a *= 0.7; // thinner rains and snow
-
-	vec4 tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * uvSolid - 1.0, 2.0 * dSolid - 1.0, 1.0);
-	vec3 eyePos  = tempPos.xyz / tempPos.w;
-
-	vec4 light	= texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_LIGT));
-	vec3 rawMat	= texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MATS)).xyz;
-	vec3 normal	= normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_MNORM)).xyz);
-	vec3 vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(uvSolid, ID_SOLID_NORM)).xyz);
-
-	bool solidIsManaged = light.x > 0.0;
-	vec3 solidPos = eyePos;
-	float solidNormaly = vertexNormal.y;
-
-	#ifdef SHADOW_MAP_PRESENT
+	vec4  baseColor_translucent = texture(u_gbuffer_trans, vec3(v_texcoord, ID_TRANS_COLR));
 	{
-		light.w = denoisedShadowFactor(
-			u_gbuffer_shadow,
-			uvSolid,
-			eyePos,
-			dSolid,
-			light.y,
-			vertexNormal);
+		// some solids (e.g. player entity) render after translucent for no good reason
+		baseColor_translucent = depth_solid < depth_translucent ? vec4(0.0) : baseColor_translucent;
 	}
-	#else
+	vec4  baseLight_translucent = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_LIGT));
+
+
+	vec4  baseColor_particles = texture(u_gbuffer_trans, vec3(v_texcoord, ID_PARTS_COLR));
 	{
-		light.w = noShadowLightFactor(light.y);
-	}
-	#endif
-
-	vec3 miscSolid = texture(u_gbuffer_main_etc, vec3(uvSolid, ID_SOLID_MISC)).xyz;
-	vec3 miscTrans = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
-	bool transIsWater = bit_unpack(miscTrans.z, 7) == 1.;
-	bool solidIsUnderwater = decideUnderwater(dSolid, dTrans, transIsWater, false);
-	vec3 toFrag = normalize(eyePos);
-	float disableDiffuse = bit_unpack(miscSolid.z, 4);
-
-	vec4 base;
-	vec3 sky0 = skyBase(toFrag, frx_vanillaClearColor);
-	vec4 skyBasic = basicSky(toFrag, sky0);
-	vec4 sky = customSky(sky0, u_resources, toFrag, dSolid == 1.0 ? cSolid.rgb : frx_vanillaClearColor, solidIsUnderwater);
-
-	if (dSolid == 1.0) {
-		base = sky;
-	} else {
-		base = shading(cSolid, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, solidIsUnderwater, disableDiffuse);
-		base = overlay(base, u_resources, miscSolid);
+		baseColor_particles.rgb /= (baseColor_particles.a == 0.0) ? 1.0 : baseColor_particles.a;
+		// translucent particles are rendered without solid depth test
+		baseColor_particles = depth_solid < depth_particles ? vec4(0.0) : baseColor_particles;
 	}
 
-	float dMin = min(dSolid, min(dTrans, min(dParts, dRains)));
-
-	// reflection doesn't include other translucent stuff
-	if (dSolid > dTrans) {
-		base += skyReflection(u_resources, cSolid.rgb, rawMat.xy, toFrag, normal, light.yw);
-	}
-
-	if (dSolid > dMin) {
-		vec4 clouds = customClouds(u_vanilla_clouds_depth, u_tex_nature, u_resources, dSolid, uvSolid, eyePos, toFrag, NUM_SAMPLE, ldepth(dMin) * frx_viewDistance * 4., skyBasic);
-		base.rgb = base.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
-	}
-
-	vec4 foggedColor = base;
-	vec3 foggedToFrag = toFrag;
-	float foggedDist = length(eyePos);
-	bool foggedIsUnderwater = solidIsUnderwater;
-	// float foggedLightY = light.y;
-	// float foggedDepth = dSolid;
-	// float tileJitter = getRandomFloat(u_resources, v_texcoord, frxu_size);
-
-
-	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dParts - 1.0, 1.0);
-	eyePos  = tempPos.xyz / tempPos.w;
-	light = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_PARTS_LIGT));
-
-
-	#ifdef SHADOW_MAP_PRESENT
+	vec4  baseColor_weather = texture(u_weather_color, v_texcoord);
 	{
-		light.w = denoisedShadowFactor(
-			u_gbuffer_shadow,
-			v_texcoord,
-			eyePos,
-			dParts,
-			light.y,
-			-frx_cameraView);
+		baseColor_weather.rgb /= baseColor_weather.a == 0.0 ? 1.0 : baseColor_weather.a;
+		// probably unnecessary
+		// baseColor_weather = depth_solid < depth_weather ? vec4(0.0) : baseColor_weather;
+		// Unused
+		// baseColor_weather.rgb = frx_worldIsOverworld == 1 ? vec3(lightLuminance(baseColor_weather.rgb)) : baseColor_weather.rgb;
+		baseColor_weather.a *= 0.7; // thinner rain and snow
 	}
-	#else
+
+	vec4 baseColor_solid = texture(u_vanilla_color, uv_solid_refracted);
+	vec4 baseLight_solid = texture(u_gbuffer_lightnormal, vec3(uv_solid_refracted, ID_SOLID_LIGT));
+	vec3 baseVertNormal_solid = normalize(texture(u_gbuffer_lightnormal, vec3(uv_solid_refracted, ID_SOLID_NORM)).xyz);
+
+	bool solid_isManaged = baseLight_solid.x > 0.0;
+
+	vec3 solid_eyePos;
 	{
-		light.w = noShadowLightFactor(light.y);
+		vec4 temp = frx_inverseViewProjectionMatrix * vec4(2.0 * uv_solid_refracted - 1.0, 2.0 * depth_solid - 1.0, 1.0);
+		solid_eyePos = temp.xyz / temp.w;
 	}
-	#endif
 
-	vec4 nextParts = particleShading(cParts, u_tex_nature, light, eyePos, decideUnderwater(dParts, dTrans, transIsWater, false));
+	vec3 baseMisc_translucent = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MISC)).xyz;
+	bool translucent_isWater = bit_unpack(baseMisc_translucent.z, 7) == 1.;
+	bool solid_isUnderwater = decideUnderwater(depth_solid, depth_translucent, translucent_isWater, false);
+	vec3 global_toFrag = normalize(solid_eyePos);
 
-	vec4 nextTrans;
-	bool transIsManaged = cTrans.a > 0.0 && notEndPortal(u_gbuffer_lightnormal) && lTrans.x > 0.0;
-
-	// will be used for fog outside of shading
-	tempPos = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * dTrans - 1.0, 1.0);
-	eyePos  = tempPos.xyz / tempPos.w;
-	light   = lTrans;
-	vertexNormal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).xyz);
-
-	#ifdef SHADOW_MAP_PRESENT
+	vec4 sky_basic;
+	vec4 sky;
 	{
-		light.w = denoisedShadowFactor(
-			u_gbuffer_shadow,
-			v_texcoord,
-			eyePos,
-			dTrans,
-			light.y,
-			vertexNormal);
+		vec3 sky_base = skyBase(global_toFrag, frx_vanillaClearColor);
+		sky_basic = basicSky(global_toFrag, sky_base);
+		sky = customSky(
+			sky_base,
+			u_resources,
+			global_toFrag,
+			(depth_solid == 1.0) ? baseColor_solid.rgb : frx_vanillaClearColor,
+			solid_isUnderwater
+		);
 	}
-	#else
+
+	vec4 solid_output;
+	vec4 solid_fogged_output;
 	{
-		light.w = noShadowLightFactor(light.y);
+		if (depth_solid == 1.0)
+		{
+			solid_output = sky;
+		}
+		else
+		{
+			vec3 basePbrMat_solid = texture(u_gbuffer_main_etc, vec3(uv_solid_refracted, ID_SOLID_MATS)).xyz;
+			vec3 baseFragNormal_solid = normalize(texture(u_gbuffer_lightnormal, vec3(uv_solid_refracted, ID_SOLID_MNORM)).xyz);
+			vec3 baseMisc_solid = texture(u_gbuffer_main_etc, vec3(uv_solid_refracted, ID_SOLID_MISC)).xyz;
+
+			vec4 solid_light = baseLight_solid;
+
+			#ifdef SHADOW_MAP_PRESENT
+			{
+				solid_light.w = denoisedShadowFactor(
+					u_gbuffer_shadow,
+					uv_solid_refracted,
+					solid_eyePos,
+					depth_solid,
+					baseLight_solid.y,
+					baseVertNormal_solid
+				);
+			}
+			#else
+			{
+				solid_light.w = noShadowLightFactor(baseLight_solid.y);
+			}
+			#endif
+
+			solid_output = shading(
+				baseColor_solid,
+				u_tex_nature,
+				solid_light,
+				basePbrMat_solid,
+				solid_eyePos,
+				baseFragNormal_solid,
+				baseVertNormal_solid,
+				solid_isUnderwater,
+				bit_unpack(baseMisc_solid.z, 4)
+			);
+			
+			solid_output = overlay(
+				solid_output,
+				u_resources,
+				baseMisc_solid
+			);
+			
+			if (depth_solid > depth_translucent)
+			{
+				// sky reflection behind translucent
+				solid_output += skyReflection(
+					u_resources,
+					baseColor_solid.rgb,
+					basePbrMat_solid.xy,
+					global_toFrag,
+					baseFragNormal_solid,
+					solid_light.yw
+				);
+			}
+		}
+
+		if (depth_solid > MinimumDepth)
+		{
+			float fogged_dist = length(solid_eyePos);
+
+			solid_fogged_output = mix(
+				fog(solid_output, fogged_dist, global_toFrag, solid_isUnderwater),
+				sky_basic,
+				edgeBlendFactor(fogged_dist)
+			);
+
+			// fog behind translucent terrain only, for perfect reflection
+			if (depth_solid > depth_translucent)
+			{
+				solid_output = solid_fogged_output;
+			}
+
+			vec4 clouds = customClouds(
+				u_vanilla_clouds_depth,
+				u_tex_nature,
+				u_resources,
+				depth_solid,
+				uv_solid_refracted,
+				solid_eyePos,
+				global_toFrag,
+				NUM_SAMPLE,
+				sky_basic);
+			
+			solid_output.rgb = solid_output.rgb * (1.0 - clouds.a) + clouds.rgb * clouds.a;
+		}
 	}
-	#endif
 
-	if (transIsManaged) {
-		cTrans.rgb = cTrans.rgb / (fastLight(lTrans.xy, vertexNormal) * cTrans.a);
-		rawMat = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
-		normal = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz);
-		disableDiffuse = bit_unpack(miscTrans.z, 4);
+	vec4 particles_output;
+	{
+		vec4 temp = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth_particles - 1.0, 1.0);
+		vec3 particles_eyePos  = temp.xyz / temp.w;
+		vec4 particles_light = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_PARTS_LIGT));
 
-		#ifdef WATER_FOAM
-		if (transIsWater && solidIsManaged) {
-			foamPreprocess(cTrans, u_tex_nature, eyePos + frx_cameraPos, vertexNormal.y, solidNormaly, eyePos, solidPos);
+		#ifdef SHADOW_MAP_PRESENT
+		{
+			particles_light.w = denoisedShadowFactor(
+				u_gbuffer_shadow,
+				v_texcoord,
+				particles_eyePos,
+				depth_particles,
+				particles_light.y,
+				-frx_cameraView);
+		}
+		#else
+		{
+			particles_light.w = noShadowLightFactor(particles_light.y);
 		}
 		#endif
 
-		nextTrans = shading(cTrans, u_tex_nature, light, rawMat, eyePos, normal, vertexNormal, decideUnderwater(dTrans, dTrans, transIsWater, true), disableDiffuse);
-		nextTrans = overlay(nextTrans, u_resources, miscTrans);
-	} else {
-		cTrans.rgb = cTrans.rgb / (cTrans.a == 0.0 ? 1.0 : cTrans.a);
-		nextTrans = vec4(hdr_fromGamma(cTrans.rgb), cTrans.a);
-	}
-
-	// fog behind rain or trans but only if it's not water (why are you like this)
-	bool foggedIsTrans = dTrans < dSolid && dMin < dTrans;
-	if (dMin < dSolid && (!solidIsUnderwater || foggedIsTrans)) {
-
-		if (foggedIsTrans) {
-			foggedColor = nextTrans;
-			foggedDist = length(eyePos);
-			foggedIsUnderwater = frx_cameraInWater == 1;
-			// foggedToFrag is the same
-			// foggedLightY = light.y;
-			// foggedDepth = dTrans;
-		}
-
-		// use normal fog for optimization because vol fog isn't applied during rain
-		vec4 fogged = fog(foggedColor, foggedDist, foggedToFrag, foggedIsUnderwater);
-		// vec4 fogged = volumetricFog(u_gbuffer_shadow, u_tex_nature, foggedColor, foggedDist, foggedToFrag, foggedLightY, tileJitter, foggedDepth, foggedIsUnderwater);
+		particles_output = particleShading(
+			baseColor_particles,
+			u_tex_nature,
+			particles_light,
+			particles_eyePos,
+			decideUnderwater(depth_particles, depth_translucent, translucent_isWater, false)
+		);
 		
-		float edgeBlend = edgeBlendFactor(foggedDist);
-		fogged = mix(fogged, skyBasic, edgeBlend);
-
-		if (foggedIsTrans) {
-			nextTrans = fogged;
-		}
-
-		// do this mix to fill gaps
-		base = mix(base, fogged, foggedIsTrans ? (1.0 - nextTrans.a) : 1.0);
+		particles_output = vec4(
+			ldr_tonemap(particles_output.rgb) * particles_output.a, // premultiply α
+			particles_output.a
+		);
 	}
 
-	vec4 nextRains = vec4(hdr_fromGamma(cRains.rgb), cRains.a);
+	vec3 baseVertNormal_translucent = texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_NORM)).xyz;
 
-	vec4 next0, next1, next, after0, after1;
+	bool translucent_isManaged = (
+		(baseColor_translucent.a > 0.0)
+		&& (baseLight_translucent.x > 0.0)
+		// Deprecated End Portal check (does not work in 26.1 since End Portal now renders as solid)
+		&& (baseVertNormal_translucent != baseLight_translucent.xyz)
+	);
 
-	// try alpha compositing in HDR and you will go bald
-	nextParts = vec4(ldr_tonemap(nextParts.rgb) * nextParts.a, nextParts.a); // premultiply α
-	nextRains = vec4(ldr_tonemap(nextRains.rgb) * nextRains.a, nextRains.a);
-	base = ldr_tonemap(base);
+	vec4 translucent_output;
+	{
+		if (translucent_isManaged)
+		{
+			// will be used for fog outside of shading
+			vec4 temp = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth_translucent - 1.0, 1.0);
+			vec3 translucent_eyePos  = temp.xyz / temp.w;
+			
+			baseVertNormal_translucent = normalize(baseVertNormal_translucent);
+			vec4 light_translucent = baseLight_translucent;
+
+			#ifdef SHADOW_MAP_PRESENT
+			{
+				light_translucent.w = denoisedShadowFactor(
+					u_gbuffer_shadow,
+					v_texcoord,
+					translucent_eyePos,
+					depth_translucent,
+					baseLight_translucent.y,
+					baseVertNormal_translucent);
+			}
+			#else
+			{
+				light_translucent.w = noShadowLightFactor(baseLight_translucent.y);
+			}
+			#endif
+
+			// TODO remove fast light (advanced lighting 4.0) replace with forward shading
+			// baseColor_translucent.rgb /= ((baseColor_translucent.a == 0.0) ? 1.0 : baseColor_translucent.a);
+			baseColor_translucent.rgb /= (
+				fastLight(baseLight_translucent.xy, baseVertNormal_translucent) * baseColor_translucent.a
+			);
+
+			vec3 basePbrMat_translucent = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
+			vec3 baseFragNormal_translucent = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz);
+			float disableDiffuse_translucent = bit_unpack(baseMisc_translucent.z, 4);
+
+			#ifdef WATER_FOAM
+			if (translucent_isWater && solid_isManaged) {
+				foamPreprocess(
+					baseColor_translucent,
+					u_tex_nature,
+					translucent_eyePos + frx_cameraPos,
+					baseVertNormal_translucent.y,
+					baseVertNormal_solid.y,
+					translucent_eyePos,
+					solid_eyePos
+				);
+			}
+			#endif
+
+			translucent_output = shading(
+				baseColor_translucent,
+				u_tex_nature,
+				light_translucent,
+				basePbrMat_translucent,
+				translucent_eyePos,
+				baseFragNormal_translucent,
+				baseVertNormal_translucent,
+				decideUnderwater(depth_translucent, depth_translucent, translucent_isWater, true),
+				disableDiffuse_translucent
+			);
+			
+			translucent_output = overlay(
+				translucent_output,
+				u_resources,
+				baseMisc_translucent
+			);
+			
+			if (depth_translucent > MinimumDepth)
+			{
+				float fogged_dist = length(translucent_eyePos);
+				translucent_output =  mix(
+					fog(translucent_output, fogged_dist, global_toFrag, frx_cameraInWater == 1),
+					sky_basic,
+					edgeBlendFactor(fogged_dist)
+				);
+			}
+		} else {
+			baseColor_translucent.rgb /= ((baseColor_translucent.a == 0.0) ? 1.0 : baseColor_translucent.a);
+			translucent_output = vec4(hdr_fromGamma(baseColor_translucent.rgb), baseColor_translucent.a);
+		}
+	}
+
+	translucent_output = vec4(ldr_tonemap(translucent_output.rgb) * translucent_output.a, translucent_output.a);
+	solid_output = ldr_tonemap(solid_output);
+
+	vec4 weather_output;
+	{
+		weather_output = vec4(hdr_fromGamma(baseColor_weather.rgb), baseColor_weather.a);
+		// try alpha compositing in HDR and you will go bald
+		weather_output = vec4(ldr_tonemap(weather_output.rgb) * weather_output.a, weather_output.a);
+	}
+
+	// final sorting
+	vec4 before1 = vec4(0.0);
+	vec4 before2 = vec4(0.0);
+	// after translucent is separated for better reflections that excludes particles
+	vec4 after1 = vec4(0.0);
+	vec4 after2 = vec4(0.0);
 
 	// TODO: is this slower than insert sort?
-	if (dRains > dTrans && dParts > dTrans) {
-		next0 = (dRains > dParts ? nextRains : nextParts);
-		next1 = (dRains > dParts ? nextParts : nextRains);
-		after0 = after1 = vec4(0.0);
-	} else if (dParts > dTrans) {
-		next1 = nextParts;
-		after0 = vec4(0.0);
-		after1 = nextRains;
-	} else if (dRains > dTrans) {
-		next1 = nextRains;
-		after0 = vec4(0.0);
-		after1 = nextParts;
-	} else {
-		next0 = next1 = vec4(0.0);
-		after0 = (dRains > dParts ? nextRains : nextParts);
-		after1 = (dRains > dParts ? nextParts : nextRains);
+	if (MinimumDepth == depth_translucent)
+	{
+		if (depth_particles < depth_weather)
+		{
+			before2 = particles_output;
+			before1 = weather_output;
+		}
+		else
+		{
+			before2 = weather_output;
+			before1 = particles_output;
+		}
+	}
+	else if (MinimumDepth == depth_particles)
+	{
+		after2 = particles_output;
+
+		if (depth_translucent < depth_weather)
+		{
+			before1 = weather_output;
+		}
+		else
+		{
+			after1 = weather_output;
+		}
+	}
+	else
+	{
+		after2 = weather_output;
+
+		if (depth_translucent < depth_particles)
+		{
+			before1 = particles_output;
+		}
+		else
+		{
+			after1 = particles_output;
+		}
 	}
 
-	nextTrans = vec4(ldr_tonemap(nextTrans.rgb) * nextTrans.a, nextTrans.a);
+	out_color = hdr_inverseTonemap(
+		premultBlend(premultBlend(premultBlend(translucent_output, before2), before1), solid_output)
+	);
+	out_depth = MinimumDepth;
+	out_after = premultBlend(after2, after1);
+	
+	// patch holes in solid fog
+	if (depth_solid < 1.0 && depth_solid > MinimumDepth && depth_solid <= depth_translucent)
+	{
+		out_after = premultBlend(out_after, ldr_tonemap(solid_fogged_output));
+	}
 
-	next1 = premultBlend(next1, next0);
-	next  = premultBlend(nextTrans, next1);
-	after1 = premultBlend(after1, after0);
-	base  = premultBlend(next, base);
-
-	fragColor = hdr_inverseTonemap(base);
-	fragDepth = dMin;
-	fragTrans = next;
-	fragAfter = after1;
-
-	if (dTrans == dSolid) {
-		fragAlbedo = vec4(hdrAlbedo(cSolid), 0.0);
+	if (depth_solid <= depth_translucent) {
+		out_albedo = vec4(
+			hdrAlbedo(baseColor_solid),
+			solid_isManaged ? ALBEDO_ALPHA_SOLID : ALBEDO_ALPHA_UNMANAGED
+		);
 	} else {
-		fragAlbedo = vec4(hdrAlbedo(cTrans), 0.5);
+		out_albedo = vec4(
+			hdrAlbedo(baseColor_translucent),
+			translucent_isManaged ? ALBEDO_ALPHA_TRANSLUCENT : ALBEDO_ALPHA_UNMANAGED
+		);
 	}
 }

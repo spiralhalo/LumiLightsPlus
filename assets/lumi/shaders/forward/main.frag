@@ -29,7 +29,12 @@ uniform sampler2D u_tex_nature;
 in float pv_diffuse;
 in vec3 pv_vertex;
 
-out vec4[7] fragColor;
+layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outLight;
+layout(location = 2) out vec4 outVertNormal;
+layout(location = 3) out vec4 outFragNormal;
+layout(location = 4) out vec4 outPbrMat;
+layout(location = 5) out vec4 outFlags;
 
 void frx_pipelineFragment()
 {
@@ -41,12 +46,14 @@ void frx_pipelineFragment()
 	frx_fragColor = max(frx_fragColor, vec4(0.004, 0.004, 0.004, 0.0));
 
 	// cutout_zero by default. remove if causing unwanted consequences.
-	if (frx_fragColor.a == 0.0) {
+	if (frx_fragColor.a == 0.0)
+	{
 		discard;
 	}
 
 	// Vanilla AO never make sense for anything other than terrain
-	if (!frx_modelOriginRegion) {
+	if (!frx_modelOriginRegion)
+	{
 		frx_fragEnableAo = false;
 	}
 
@@ -54,13 +61,16 @@ void frx_pipelineFragment()
 	frx_fragColor.rgb = vec3(1.0);
 	#endif
 
-	if (frx_isGui && !frx_isHand) {
+	if (frx_isGui && !frx_isHand)
+	{
 		float diffuse = mix(pv_diffuse, 1, frx_fragEmissive);
 		// diffuse = frx_isGui ? diffuse : min(1.0, 1.5 - diffuse);
 		diffuse = frx_fragEnableDiffuse ? diffuse : 1.0;
 		frx_fragColor.rgb *= diffuse;
 		frx_fragColor.rgb += autoGlint(u_resources, frx_normalizeMappedUV(frx_texcoord), frx_matGlint);
-	} else {
+	}
+	else
+	{
 		#if LUMI_PBR_API >= 7
 		pbrExt_resolveProperties();
 		#else // safeguard
@@ -69,7 +79,8 @@ void frx_pipelineFragment()
 		bool pbr_builtinWater = false;
 		#endif
 
-		if (pbr_builtinWater) {
+		if (pbr_builtinWater)
+		{
 			pbr_isWater = true;
 			frx_fragReflectance = 0.02;
 			frx_fragRoughness = 0.05;
@@ -100,9 +111,13 @@ void frx_pipelineFragment()
 		frx_fragColor.rgba += vec4(wtrNs * wtrNs * wtrNs);
 		#endif
 
-		if (frx_fragRoughness == 0.0) frx_fragRoughness = 1.0; // TODO: fix assumption?
+		// if (frx_fragRoughness == 0.0) 
+		// {
+		// 	frx_fragRoughness = 1.0; // TODO: fix assumption?
+		// }
 
-		if (pbrExt_doTBN) {
+		if (pbrExt_doTBN)
+		{
 			vec3 bitangent = cross(frx_vertexNormal, frx_vertexTangent.xyz) * frx_vertexTangent.w;
 			mat3 TBN = mat3(frx_vertexTangent.xyz, bitangent, frx_vertexNormal);
 			frx_fragNormal = TBN * frx_fragNormal;
@@ -121,17 +136,18 @@ void frx_pipelineFragment()
 		float bitFlags = bit_pack(frx_matFlash, frx_matHurt, frx_matGlint, 0., disableDiffuse, 0., 0., float(pbr_isWater));
 
 		// PERF: view normal, more useful than world normal
-		fragColor[1] = vec4(frx_fragLight.xy, frx_fragEmissive, 1.0);
-		fragColor[2] = vec4(frx_vertexNormal, 1.0);
-		fragColor[3] = vec4(frx_fragNormal, 1.0);
-		fragColor[4] = vec4(roughness, frx_fragReflectance, ao, 1.0);
-		fragColor[5] = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
+		outLight = vec4(frx_fragLight.xy, frx_fragEmissive, 1.0);
+		outVertNormal = vec4(frx_vertexNormal, 1.0);
+		outFragNormal = vec4(frx_fragNormal, 1.0);
+		outPbrMat = vec4(roughness, frx_fragReflectance, ao, 1.0);
+		outFlags = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
 	}
 
 	// Advanced translucency 4.0
-	if (frx_renderTargetTranslucent || frx_renderTargetEntity) {
+	if (frx_renderTargetTranslucent || frx_renderTargetEntity)
+	{
 		frx_fragColor.rgb *= fastLight(frx_fragLight.xy, frx_vertexNormal);
 	}
 
-	fragColor[0] = frx_fragColor;
+	outColor = frx_fragColor;
 }

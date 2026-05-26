@@ -1,7 +1,7 @@
 #include lumi:shaders/pass/header.glsl
 
 #include frex:shaders/lib/sample.glsl
-#include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/data/atmosphere.glsl
 #include lumi:shaders/prog/tonemap.glsl
 
 /******************************************************

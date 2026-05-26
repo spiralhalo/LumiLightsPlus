@@ -1,0 +1,49 @@
+{
+	images: [
+		{
+			name: "frame_data",
+			lod: 0,
+			width: 32,
+            height: 1,
+			internalFormat: "RGB16F",
+			pixelFormat: "RGB",
+			pixelDataType: "FLOAT",
+			target: "TEXTURE_2D",
+			texParams: [ 
+				{name: "TEXTURE_MIN_FILTER", val: "NEAREST"}, {name: "TEXTURE_MAG_FILTER", val: "NEAREST"},
+				{name: "TEXTURE_WRAP_S", val: "REPEAT"}, {name: "TEXTURE_WRAP_T", val: "REPEAT"},
+			]
+		},
+	],
+
+	framebuffers: [
+		{
+			name: "frame_data_gen",
+			colorAttachments: [
+				{image: "frame_data", clearColor: 0x00000000}
+			]
+		}
+	],
+
+	programs: [
+		{
+			name: "frame_data_gen",
+			vertexSource: "lumi:shaders/pass/before_world_render/frame_data_gen.glsl",
+			fragmentSource: "lumi:shaders/pass/before_world_render/frame_data_gen.glsl",
+			samplers: []
+		}
+	],
+
+	beforeWorldRender: {
+		passes: [
+			{
+				name: "frame_data_gen",
+				program: "frame_data_gen",
+				framebuffer: "frame_data_gen",
+				width: 32,
+				height: 1,
+				samplerImages: []
+			},
+		]
+	},
+}

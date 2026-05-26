@@ -3,6 +3,7 @@
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/pack_normal.glsl
 #include lumi:shaders/prog/clouds.glsl
+#include lumi:shaders/prog/frame_data.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/overlay.glsl
 #include lumi:shaders/prog/shading.glsl
@@ -27,12 +28,12 @@ uniform sampler2DArray u_gbuffer_trans;
 uniform sampler2DArray u_gbuffer_main_etc;
 uniform sampler2DArray u_gbuffer_lightnormal;
 
+uniform sampler2DArray u_resources;
+uniform sampler2D u_tex_nature;
+
 #ifdef SHADOW_MAP_PRESENT
 uniform sampler2DArrayShadow u_gbuffer_shadow;
 #endif
-
-uniform sampler2DArray u_resources;
-uniform sampler2D u_tex_nature;
 
 layout(location = 0) out vec4 out_color;
 layout(location = 1) out float out_depth;
@@ -135,7 +136,8 @@ void main()
 					solid_eyePos,
 					depth_solid,
 					baseLight_solid.y,
-					baseVertNormal_solid
+					baseVertNormal_solid,
+					v_invSize
 				);
 			}
 			#else
@@ -171,7 +173,9 @@ void main()
 					basePbrMat_solid.xy,
 					global_toFrag,
 					baseFragNormal_solid,
-					solid_light.yw
+					solid_light.yw,
+					v_texcoord,
+					frxu_size
 				);
 			}
 		}
@@ -181,7 +185,12 @@ void main()
 			float fogged_dist = length(solid_eyePos);
 
 			solid_fogged_output = mix(
-				fog(solid_output, fogged_dist, global_toFrag, solid_isUnderwater),
+				fog(
+					solid_output,
+					fogged_dist,
+					global_toFrag,
+					solid_isUnderwater
+				),
 				sky_basic,
 				edgeBlendFactor(fogged_dist)
 			);
@@ -198,6 +207,7 @@ void main()
 				u_resources,
 				depth_solid,
 				uv_solid_refracted,
+				frxu_size,
 				solid_eyePos,
 				global_toFrag,
 				NUM_SAMPLE,
@@ -221,7 +231,9 @@ void main()
 				particles_eyePos,
 				depth_particles,
 				particles_light.y,
-				-frx_cameraView);
+				-frx_cameraView,
+				v_invSize
+			);
 		}
 		#else
 		{
@@ -256,88 +268,111 @@ void main()
 	{
 		if (translucent_isManaged)
 		{
-			// will be used for fog outside of shading
-			vec4 temp = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth_translucent - 1.0, 1.0);
-			vec3 translucent_eyePos  = temp.xyz / temp.w;
-			
-			baseVertNormal_translucent = normalize(baseVertNormal_translucent);
-			vec4 light_translucent = baseLight_translucent;
-
-			#ifdef SHADOW_MAP_PRESENT
+			#ifndef FORWARD_TRANSLUCENT
 			{
-				light_translucent.w = denoisedShadowFactor(
-					u_gbuffer_shadow,
-					v_texcoord,
-					translucent_eyePos,
-					depth_translucent,
-					baseLight_translucent.y,
-					baseVertNormal_translucent);
-			}
-			#else
-			{
-				light_translucent.w = noShadowLightFactor(baseLight_translucent.y);
-			}
-			#endif
+				// will be used for fog outside of shading
+				vec4 temp = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth_translucent - 1.0, 1.0);
+				vec3 translucent_eyePos  = temp.xyz / temp.w;
+				
+				baseVertNormal_translucent = normalize(baseVertNormal_translucent);
+				vec4 light_translucent = baseLight_translucent;
 
-			// TODO remove fast light (advanced lighting 4.0) replace with forward shading
-			// baseColor_translucent.rgb /= ((baseColor_translucent.a == 0.0) ? 1.0 : baseColor_translucent.a);
-			baseColor_translucent.rgb /= (
-				fastLight(baseLight_translucent.xy, baseVertNormal_translucent) * baseColor_translucent.a
-			);
+				#ifdef SHADOW_MAP_PRESENT
+				{
+					light_translucent.w = denoisedShadowFactor(
+						u_gbuffer_shadow,
+						v_texcoord,
+						translucent_eyePos,
+						depth_translucent,
+						baseLight_translucent.y,
+						baseVertNormal_translucent,
+						v_invSize
+					);
+				}
+				#else
+				{
+					light_translucent.w = noShadowLightFactor(baseLight_translucent.y);
+				}
+				#endif
 
-			vec3 basePbrMat_translucent = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
-			vec3 baseFragNormal_translucent = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz);
-			float disableDiffuse_translucent = bit_unpack(baseMisc_translucent.z, 4);
+				// TODO remove fast light (advanced lighting 4.0) replace with forward shading
+				// baseColor_translucent.rgb /= ((baseColor_translucent.a == 0.0) ? 1.0 : baseColor_translucent.a);
+				baseColor_translucent.rgb /= (
+					fastLight(baseLight_translucent.xy, baseVertNormal_translucent) * baseColor_translucent.a
+				);
 
-			#ifdef WATER_FOAM
-			if (translucent_isWater && solid_isManaged) {
-				foamPreprocess(
+				vec3 basePbrMat_translucent = texture(u_gbuffer_main_etc, vec3(v_texcoord, ID_TRANS_MATS)).xyz;
+				vec3 baseFragNormal_translucent = normalize(texture(u_gbuffer_lightnormal, vec3(v_texcoord, ID_TRANS_MNORM)).xyz);
+				float disableDiffuse_translucent = bit_unpack(baseMisc_translucent.z, 4);
+
+				#ifdef WATER_FOAM
+				if (translucent_isWater && solid_isManaged) {
+					foamPreprocess(
+						baseColor_translucent,
+						u_tex_nature,
+						translucent_eyePos + frx_cameraPos,
+						baseVertNormal_translucent.y,
+						baseVertNormal_solid.y,
+						translucent_eyePos,
+						solid_eyePos
+					);
+				}
+				#endif
+
+				translucent_output = shading(
 					baseColor_translucent,
 					u_tex_nature,
-					translucent_eyePos + frx_cameraPos,
-					baseVertNormal_translucent.y,
-					baseVertNormal_solid.y,
+					light_translucent,
+					basePbrMat_translucent,
 					translucent_eyePos,
-					solid_eyePos
+					baseFragNormal_translucent,
+					baseVertNormal_translucent,
+					decideUnderwater(depth_translucent, depth_translucent, translucent_isWater, true),
+					disableDiffuse_translucent
 				);
-			}
-			#endif
-
-			translucent_output = shading(
-				baseColor_translucent,
-				u_tex_nature,
-				light_translucent,
-				basePbrMat_translucent,
-				translucent_eyePos,
-				baseFragNormal_translucent,
-				baseVertNormal_translucent,
-				decideUnderwater(depth_translucent, depth_translucent, translucent_isWater, true),
-				disableDiffuse_translucent
-			);
-			
-			translucent_output = overlay(
-				translucent_output,
-				u_resources,
-				baseMisc_translucent
-			);
-			
-			if (depth_translucent > MinimumDepth)
-			{
-				float fogged_dist = length(translucent_eyePos);
-				translucent_output =  mix(
-					fog(translucent_output, fogged_dist, global_toFrag, frx_cameraInWater == 1),
-					sky_basic,
-					edgeBlendFactor(fogged_dist)
+				
+				translucent_output = overlay(
+					translucent_output,
+					u_resources,
+					baseMisc_translucent
 				);
+				
+				if (depth_translucent > MinimumDepth)
+				{
+					float fogged_dist = length(translucent_eyePos);
+					translucent_output =  mix(
+						fog(
+							translucent_output,
+							fogged_dist,
+							global_toFrag,
+							frx_cameraInWater == 1
+						),
+						sky_basic,
+						edgeBlendFactor(fogged_dist)
+					);
+				}
 			}
+			#else
+			translucent_output = baseColor_translucent;
+			#endif //FORWARD_TRANSLUCENT
 		} else {
 			baseColor_translucent.rgb /= ((baseColor_translucent.a == 0.0) ? 1.0 : baseColor_translucent.a);
 			translucent_output = vec4(hdr_fromGamma(baseColor_translucent.rgb), baseColor_translucent.a);
 		}
-	}
 
-	translucent_output = vec4(ldr_tonemap(translucent_output.rgb) * translucent_output.a, translucent_output.a);
-	solid_output = ldr_tonemap(solid_output);
+		#ifndef FORWARD_TRANSLUCENT
+		{
+			translucent_output = vec4(ldr_tonemap(translucent_output.rgb) * translucent_output.a, translucent_output.a);
+		}
+		#else
+		{
+			if (!translucent_isManaged)
+			{
+				translucent_output = vec4(ldr_tonemap(translucent_output.rgb) * translucent_output.a, translucent_output.a);
+			}
+		}
+		#endif
+	}
 
 	vec4 weather_output;
 	{
@@ -393,12 +428,25 @@ void main()
 			after1 = particles_output;
 		}
 	}
-
-	out_color = hdr_inverseTonemap(
-		premultBlend(premultBlend(premultBlend(translucent_output, before2), before1), solid_output)
-	);
+	
 	out_depth = MinimumDepth;
-	out_after = premultBlend(after2, after1);
+
+	#ifndef FORWARD_TRANSLUCENT
+	{
+		out_color = hdr_inverseTonemap(
+			premultBlend(premultBlend(premultBlend(translucent_output, before2), before1), solid_output = ldr_tonemap(solid_output))
+		);
+		out_after = premultBlend(after2, after1);
+	}
+	#else
+	{
+		out_color = solid_output;
+		out_after = premultBlend(
+			premultBlend(after2, after1),
+			premultBlend(premultBlend(translucent_output, before2), before1)
+		);
+	}
+	#endif
 	
 	// patch holes in solid fog
 	if (depth_solid < 1.0 && depth_solid > MinimumDepth && depth_solid <= depth_translucent)

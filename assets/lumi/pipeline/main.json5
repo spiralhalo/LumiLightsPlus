@@ -25,12 +25,22 @@
 		// glsl names for samplers additive to the FREX pre-defined samplers
 		samplers: [
 			"u_resources",
-			"u_tex_nature"
+			"u_tex_nature",
+			"u_frame_data",
+			"u_color_result",
+			"u_vanilla_depth",
+			"u_gbuffer_lightnormal",
+			"u_gbuffer_shadow",
 		],
 		// image names for samplers additive to the FREX pre-defined samplers
 		samplerImages: [
 			"resources",
-			"gen_nature_tex"
+			"gen_nature_tex",
+			"frame_data",
+			"color_result",
+			"vanilla_depth",
+			"gbuffer_lightnormal",
+			"gbuffer_shadow",
 		]
 	},
 
@@ -40,6 +50,7 @@
 	include: [
 		"lumi:pipeline/init.json5",
 		"lumi:pipeline/mtn.json5",
+		"lumi:pipeline/frame_data.json5",
 		"lumi:pipeline/layers.json5",
 		// "lumi:pipeline/common.json5",
 		// PASSES IN CORRECT ORDER

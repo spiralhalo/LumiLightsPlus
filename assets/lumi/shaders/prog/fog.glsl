@@ -1,33 +1,14 @@
 #include frex:shaders/api/fog.glsl
 
-#include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/data/atmosphere.glsl
+#include lumi:shaders/data/fog_data.glsl
 #include lumi:shaders/prog/volumetrics.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/fog.glsl
  *******************************************************/
 
-#ifdef VERTEX_SHADER
-out float v_blindness;
-out float v_visibility;
-
-void fogVarsSetup()
-{
-	// capture vanilla transition which happens when blindness happens/stops naturally (without milk, command, etc) 
-	v_blindness = l2_clampScale(1.0, 0.0, frx_luminance(frx_vanillaClearColor)) * float(max(frx_effectBlindness, frx_effectDarkness));
-
-	// ground visibility
-	float invThickener = 1.0;
-	// stronger night fog because it's darker
-	float night = max(frx_worldIsMoonlit, 1.0 - frx_skyLightTransitionFactor);
-	invThickener *= 1.0 - 0.6 * max(night, frx_smoothedRainGradient);
-	invThickener *= 1.0 - 0.5 * frx_thunderGradient;
-	invThickener = mix(1.0, invThickener, frx_smoothedEyeBrightness.y);
-	v_visibility = max(invThickener, frx_worldHasSkylight);
-}
-#else
-in float v_blindness;
-in float v_visibility;
+#if !defined(VERTEX_SHADER) && (defined(POST_SHADER) || defined(FORWARD_TRANSLUCENT))
 
 vec4 blindnessFog(vec4 color, float distToEye)
 {
@@ -119,8 +100,13 @@ vec3 fogColor(bool submerged, vec3 toFrag)
 	return result;
 }
 
-vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volumetric)
-{
+vec4 fog(
+	vec4 color,
+	float distToEye,
+	vec3 toFrag,
+	bool isUnderwater,
+	float volumetric
+) {
 	float visibility = getVisibility(isUnderwater);
 	float fogFactor = fullFogFactor(distToEye, toFrag, isUnderwater, visibility);
 
@@ -143,8 +129,12 @@ vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater, float volu
 	return blended;
 }
 
-vec4 fog(vec4 color, float distToEye, vec3 toFrag, bool isUnderwater)
-{
+vec4 fog(
+	vec4 color,
+	float distToEye,
+	vec3 toFrag,
+	bool isUnderwater
+) {
 	return fog(color, distToEye, toFrag, isUnderwater, 1.0);
 }
 

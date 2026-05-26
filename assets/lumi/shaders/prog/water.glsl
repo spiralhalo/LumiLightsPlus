@@ -82,7 +82,9 @@ float caustics(sampler2D natureTexture, vec3 worldPos, float vertexNormaly)
 
 	return e;
 }
+#endif
 
+#if defined(POST_SHADER) || defined(FORWARD_TRANSLUCENT)
 void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, float waterNormaly, float solidNormaly, vec3 waterPos, vec3 solidPos)
 {
 	vec2 moveA = vec2(1., 1.) * frx_renderSeconds * WATER_SPEED;
@@ -108,8 +110,9 @@ void foamPreprocess(inout vec4 albedo, sampler2D natureTexture, vec3 worldPos, f
 
 	albedo = mix(albedo, vec4(1.0), foam);
 }
-#else
+#endif
 
+#ifndef POST_SHADER
 float sampleWaterNoise(sampler2D natureTexture, vec3 worldPos, vec2 uvMove, vec3 absVertexNormal)
 {
 	vec3 yMove = 1.0 - absVertexNormal;

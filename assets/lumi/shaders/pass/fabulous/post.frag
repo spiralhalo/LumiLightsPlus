@@ -62,7 +62,19 @@ void main()
 
 	float depth_translucent = texture(u_translucent_depth, v_texcoord).r;
 
-	if (albedo.a != ALBEDO_ALPHA_UNMANAGED)
+	bool reflection_criteria;
+	
+	#ifndef FORWARD_TRANSLUCENT
+	{
+		reflection_criteria = albedo.a != ALBEDO_ALPHA_UNMANAGED;
+	}
+	#else
+	{
+		reflection_criteria = albedo.a == ALBEDO_ALPHA_SOLID;
+	}
+	#endif
+
+	if (reflection_criteria)
 	{
 		vec4 temp = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth_translucent - 1.0, 1.0);
 		vec3 eyePos  = temp.xyz / temp.w;
@@ -78,7 +90,9 @@ void main()
 				eyePos,
 				depth_translucent,
 				light.y,
-				vertexNormal);
+				vertexNormal,
+				v_invSize
+			);
 		}
 		#else
 		{
@@ -89,7 +103,6 @@ void main()
 		out_color += reflection(
 			albedo.rgb,
 			u_color_result,
-			u_gbuffer_main_etc,
 			u_translucent_depth,
 			u_tex_nature,
 			u_resources,
@@ -97,7 +110,10 @@ void main()
 			eyePos,
 			vertexNormal,
 			fragNormal,
-			light
+			light,
+			v_texcoord,
+			frxu_size,
+			false
 			);
 	}
 
@@ -105,14 +121,31 @@ void main()
 
 	out_color = hdr_inverseTonemap(premultBlend(after, ldr_tonemap(out_color)));
 
+	float depth_solid = texture(u_vanilla_depth, v_texcoord).r;
 	float depth_minimum = texture(u_color_depth, v_texcoord).r;
+	
 	vec4 temp = frx_inverseViewProjectionMatrix * vec4(2.0 * v_texcoord - 1.0, 2.0 * depth_minimum - 1.0, 1.0);
 	vec3 minimum_eyePos = temp.xyz / temp.w;
 	vec3 minimum_toFrag  = normalize(minimum_eyePos);
 	float minimum_dist = length(minimum_eyePos);
 	vec4 skyBasic = basicSky(minimum_toFrag, skyBase(minimum_toFrag, frx_vanillaClearColor));
 	
-	if (depth_minimum < 1)
+	bool fog_criteria;
+	
+	#ifndef FORWARD_TRANSLUCENT
+	{
+		fog_criteria = depth_minimum < 1;
+	}
+	#else
+	{
+		fog_criteria = (
+			depth_minimum < 1
+			&& (depth_minimum != depth_translucent || depth_minimum == depth_solid)
+		);
+	}
+	#endif
+
+	if (fog_criteria)
 	{
 		vec4 fogged;
 		
@@ -155,6 +188,7 @@ void main()
 			u_resources,
 			depth_minimum,
 			v_texcoord,
+			frxu_size,
 			minimum_eyePos,
 			minimum_toFrag,
 			NUM_SAMPLE,
@@ -167,7 +201,6 @@ void main()
 	out_color = blindnessFog(out_color, minimum_dist);
 	out_color = ldr_tonemap(out_color);
 	
-	float depth_solid = texture(u_vanilla_depth, v_texcoord).r;
 	vec4 color_vanilla_translucent = texture(u_vanilla_transl_color, v_texcoord);
 
 	if (color_vanilla_translucent.a > 0.0 && depth_translucent <= depth_solid)
@@ -206,4 +239,9 @@ void main()
 		color_entity_hitbox.rgb *= color_entity_hitbox.a;
 		out_color = premultBlend(color_entity_hitbox, out_color);
 	}
+
+	// if (v_texcoord.y > 0.9)
+	// {
+	// 	out_color = texture(u_frame_data, v_texcoord);
+	// }
 }

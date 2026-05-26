@@ -36,6 +36,8 @@
 	"config.lumi_lights.help.night_ambient_brightness": "Brightness of the moon",
 
 	"config.lumi_lights.category.effects": "Performance",
+	"config.lumi_lights.value.forward_translucent": "Forward translucent shading",
+	"config.lumi_lights.help.forward_translucent": "Translucent faces' shading and reflection are applied as they are drawn",
 	"config.lumi_lights.value.ss_reflection": "Screen-space reflection",
 	"config.lumi_lights.help.ss_reflection": "Expensive raymarched reflection",
 	"config.lumi_lights.value.ss_ao": "Screen-space ambient occlusion",

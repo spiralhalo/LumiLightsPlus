@@ -4,6 +4,11 @@
 			includeToken: "lumi:effects_config",
 			categoryKey: "config.lumi_lights.category.effects",
 			options: {
+				forward_translucent: {
+					default: true,
+					nameKey: "config.lumi_lights.value.forward_translucent",
+					descriptionKey: "config.lumi_lights.help.forward_translucent"
+				},
 				ss_reflection: {
 					default: true,
 					nameKey: "config.lumi_lights.value.ss_reflection",

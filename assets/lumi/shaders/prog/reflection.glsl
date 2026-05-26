@@ -1,3 +1,4 @@
+#include lumi:shaders/prog/clouds.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/sky.glsl
@@ -6,6 +7,7 @@
  *  lumi:shaders/prog/reflection.glsl
  *******************************************************/
 
+#if !defined(VERTEX_SHADER) && (defined(POST_SHADER) || defined(FORWARD_TRANSLUCENT))
 const float HITBOX = 0.125;
 const int MAXSTEPS = 30;
 const int PERIOD = 2;
@@ -54,9 +56,9 @@ vec3 reflectionMarch_v2(
 	sampler2D depthBuffer,
 	vec3 viewStartPos,
 	vec3 viewMarch,
-	float nearZ
-	)
-{
+	float nearZ,
+	vec2 screenCord
+) {
 	// padding to prevent back face reflection. we want the divisor to be as small as possible.
 	// too small with cause distortion of reflection near the reflector
 	float padding = -viewStartPos.z / 12.;
@@ -81,7 +83,7 @@ vec3 reflectionMarch_v2(
 	float thickness = mix(0.0016, 0.0064, abs(viewMarch.z));
 
 	float marchSign = sign(uvMarch.z);
-	float lastZ = texture(depthBuffer, v_texcoord).r;// - 0.0016 * marchSign;
+	float lastZ = texture(depthBuffer, screenCord).r;// - 0.0016 * marchSign;
 
 	float sampledZ;
 	float hit = 0.0;
@@ -124,7 +126,6 @@ const float JITTER_STRENGTH = 0.6;
 vec4 reflection(
 	vec3 albedo,
 	sampler2D colorBuffer,
-	sampler2DArray mainEtcBuffer,
 	sampler2D depthBuffer,
 	sampler2D natureTexture,
 	sampler2DArray resources,
@@ -132,7 +133,10 @@ vec4 reflection(
 	vec3 eyePos,
 	vec3 vertexNormal,
 	vec3 normal,
-	vec4 light
+	vec4 light,
+	vec2 screenCoord,
+	vec2 screenSize,
+	bool prevFrame
 	)
 {
 	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
@@ -143,11 +147,11 @@ vec4 reflection(
 	vec3 jitterPrc;
 
 	// view bobbing shaking reduction, thanks to fewizz
-	vec4 nearPos	= frx_inverseProjectionMatrix * vec4(v_texcoord * 2.0 - 1.0, -1.0, 1.0); nearPos.xyz /= nearPos.w;
+	vec4 nearPos	= frx_inverseProjectionMatrix * vec4(screenCoord * 2.0 - 1.0, -1.0, 1.0); nearPos.xyz /= nearPos.w;
 	vec3 viewToEye  = normalize(-viewPos + nearPos.xyz);
 	vec3 viewToFrag = -viewToEye;
 	vec3 viewNormal = normalize(frx_normalModelMatrix * normal);
-	vec3 viewMarch  = reflectRough(resources, viewToFrag, viewNormal, roughness, jitterPrc);
+	vec3 viewMarch  = reflectRough(resources, viewToFrag, viewNormal, roughness, screenCoord, screenSize, jitterPrc);
 	vec3 march = viewMarch * frx_normalModelMatrix;
 
 	#ifdef VOLUMETRIC_CLOUDS
@@ -169,10 +173,10 @@ vec4 reflection(
 		}
 
 		// reduce jagginess
-		float startJitter = getRandomFloat(resources, v_texcoord, frxu_size) * mix(0.2, 1.0, roughness);
+		float startJitter = getRandomFloat(resources, screenCoord, screenSize) * mix(0.2, 1.0, roughness);
 		vec3 viewStartPos = viewPos + viewMarch * startJitter;
 
-		vec3 result = reflectionMarch_v2(depthBuffer, viewStartPos, viewMarch, nearPos.z);
+		vec3 result = reflectionMarch_v2(depthBuffer, viewStartPos, viewMarch, nearPos.z, screenCoord);
 
 		vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, viewVertexNormal.z) * 0.024, abs(result.xy - 0.5));
 		result.z *= min(uvFade.x, uvFade.y);
@@ -194,7 +198,21 @@ vec4 reflection(
 		result.z *= 1.0 - pow(distanceFade, 3.0);
 		result.z *= 1.0 - edgeBlendFade;
 
-		vec4 reflectedColor = texture(colorBuffer, result.xy);
+		vec4 reflectedColor;
+		
+		if (!prevFrame)
+		{
+			reflectedColor = texture(colorBuffer, result.xy);
+		}
+		else
+		{
+			vec4 reprojectedPos = (
+				frx_lastViewProjectionMatrix
+				* vec4(reflectedPos.xyz + frx_cameraPos - frx_lastCameraPos, 1.0)
+			);
+			reprojectedPos.xy /= reprojectedPos.w;
+			reflectedColor = texture(colorBuffer, reprojectedPos.xy * 0.5 + 0.5);
+		}
 
 		objLight = vec4(reflectedColor.rgb, result.z);
 	}
@@ -211,8 +229,9 @@ vec4 reflection(
 		natureTexture,
 		natureTexture,
 		resources,
-		texture(depthBuffer, v_texcoord).r,
-		v_texcoord,
+		texture(depthBuffer, screenCoord).r,
+		screenCoord,
+		screenSize,
 		cloudPos,
 		march,
 		NUM_SAMPLE / 2,
@@ -224,3 +243,4 @@ vec4 reflection(
 
 	return vec4(reflectedLight, 0.0);
 }
+#endif

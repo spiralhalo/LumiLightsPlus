@@ -8,7 +8,12 @@
 #include lumi:shaders/common/forward.glsl
 #include lumi:shaders/common/userconfig.glsl
 #include lumi:shaders/prog/overlay.glsl
+#include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
+#include lumi:shaders/prog/shadow.glsl
+#include lumi:shaders/prog/sky.glsl
+#include lumi:shaders/prog/reflection.glsl
+#include lumi:shaders/prog/tonemap.glsl
 #include lumi:shaders/prog/water.glsl
 #include lumi:shaders/lib/bitpack.glsl
 #include lumi:shaders/lib/pack_normal.glsl
@@ -26,8 +31,18 @@
 uniform sampler2DArray u_resources;
 uniform sampler2D u_tex_nature;
 
+#ifdef FORWARD_TRANSLUCENT
+uniform sampler2D u_color_result;
+uniform sampler2D u_vanilla_depth; // might be cursed since the same program writes here but only for solids
+uniform sampler2DArray u_gbuffer_lightnormal;
+#endif
+
+#ifdef SHADOW_MAP_PRESENT
+uniform sampler2DArrayShadow u_gbuffer_shadow;
+#endif
+
 in float pv_diffuse;
-in vec3 pv_vertex;
+in vec3 pv_eyePos;
 
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outLight;
@@ -102,12 +117,12 @@ void frx_pipelineFragment()
 			#endif
 
 			#ifdef WATER_WAVES
-			frx_fragNormal = sampleWaterNormal(u_tex_nature, pv_vertex + frx_cameraPos, abs(frx_vertexNormal));
+			frx_fragNormal = sampleWaterNormal(u_tex_nature, pv_eyePos + frx_cameraPos, abs(frx_vertexNormal));
 			#endif
 		}
 
 		#ifdef WATER_NOISE_DEBUG
-		float wtrNs = sampleWaterNoise(u_tex_nature, pv_vertex + frx_cameraPos, vec2(0.0), abs(frx_vertexNormal));
+		float wtrNs = sampleWaterNoise(u_tex_nature, pv_eyePos + frx_cameraPos, vec2(0.0), abs(frx_vertexNormal));
 		frx_fragColor.rgba += vec4(wtrNs * wtrNs * wtrNs);
 		#endif
 
@@ -123,8 +138,9 @@ void frx_pipelineFragment()
 			frx_fragNormal = TBN * frx_fragNormal;
 		}
 
+		float dist = length(pv_eyePos);
 		// reduce noise caused by micro normal in faraway blocks
-		float farBlend = l2_clampScale(16.0 * 1.0, 16.0 * 4.0, length(pv_vertex));
+		float farBlend = l2_clampScale(16.0 * 1.0, 16.0 * 4.0, dist);
 		frx_fragNormal = normalize(mix(frx_fragNormal, frx_vertexNormal, farBlend));
 
 		float ao = (frx_fragEnableAo && frx_modelOriginRegion) ? frx_fragLight.z : 1.0;
@@ -141,12 +157,155 @@ void frx_pipelineFragment()
 		outFragNormal = vec4(frx_fragNormal, 1.0);
 		outPbrMat = vec4(roughness, frx_fragReflectance, ao, 1.0);
 		outMisc = vec4(frx_normalizeMappedUV(frx_texcoord), bitFlags, 1.0);
-	}
 
-	// Advanced translucency 4.0
-	if (frx_renderTargetTranslucent || frx_renderTargetEntity)
-	{
-		frx_fragColor.rgb *= fastLight(frx_fragLight.xy, frx_vertexNormal);
+		if (frx_renderTargetTranslucent || frx_renderTargetEntity)
+		{
+			#ifndef FORWARD_TRANSLUCENT
+			{
+				// Advanced translucency 4.0
+				frx_fragColor.rgb *= fastLight(frx_fragLight.xy, frx_vertexNormal);
+			}
+			#else
+			{
+				vec4 light = outLight;
+				vec3 albedo = hdrAlbedo(frx_fragColor);
+				vec2 screenSize = vec2(frx_viewWidth, frx_viewHeight);
+				vec2 invScreenSize = 1.0 / screenSize;
+				vec2 screenCoord = gl_FragCoord.xy * invScreenSize;
+
+				#ifdef SHADOW_MAP_PRESENT
+				{
+					light.w = denoisedShadowFactor(
+						u_gbuffer_shadow,
+						screenCoord,
+						pv_eyePos,
+						gl_FragCoord.z,
+						light.y,
+						frx_vertexNormal,
+						invScreenSize
+					);
+				}
+				#else
+				{
+					light.w = noShadowLightFactor(light.y);
+				}
+				#endif
+				
+				#ifdef WATER_FOAM
+				if (pbr_isWater) {
+					vec4 solid_eyePos = frx_inverseViewProjectionMatrix * vec4(
+						screenCoord * 2.0 - 1.0,
+						texture(u_vanilla_depth, screenCoord).r * 2.0 - 1.0,
+						1.0
+					);
+					
+					solid_eyePos.xyz /= solid_eyePos.w;
+					
+					// vec4 solid_eyePosT = frx_inverseViewProjectionMatrix * vec4(
+					// 	(screenCoord + vec2(invScreenSize.x, 0.0)) * 2.0 - 1.0,
+					// 	texture(u_vanilla_depth, (screenCoord + vec2(invScreenSize.x, 0.0))).r * 2.0 - 1.0,
+					// 	1.0
+					// );
+					
+					// solid_eyePosT.xyz /= solid_eyePosT.w;
+					
+					// vec4 solid_eyePosB = frx_inverseViewProjectionMatrix * vec4(
+					// 	(screenCoord + vec2(0.0, invScreenSize.y)) * 2.0 - 1.0,
+					// 	texture(u_vanilla_depth, (screenCoord + vec2(0.0, invScreenSize.y))).r * 2.0 - 1.0,
+					// 	1.0
+					// );
+					
+					// solid_eyePosB.xyz /= solid_eyePosB.w;
+
+					// vec3 solid_vertexNormal = normalize(
+					// 	cross(
+					// 		dFdx(solid_eyePos.xyz),
+					// 		dFdy(solid_eyePos.xyz)
+					// 	)
+					// );
+
+					foamPreprocess(
+						frx_fragColor,
+						u_tex_nature,
+						pv_eyePos + frx_cameraPos,
+						frx_vertexNormal.y,
+						normalize(
+							texture(
+								u_gbuffer_lightnormal, vec3(screenCoord, 3.)
+							).xyz + vec3(0.0, 0.0000001, 0.0)
+						).y,
+						pv_eyePos,
+						solid_eyePos.xyz
+					);
+				}
+				#endif
+
+				frx_fragColor = shading(
+					frx_fragColor,
+					u_tex_nature,
+					light,
+					outPbrMat.xyz,
+					pv_eyePos,
+					frx_fragNormal,
+					frx_vertexNormal,
+					frx_cameraInWater == 1,
+					disableDiffuse
+				);
+				
+				frx_fragColor += reflection(
+					albedo,
+					u_color_result,
+					u_vanilla_depth,
+					u_tex_nature,
+					u_resources,
+					outPbrMat.xyz,
+					pv_eyePos,
+					frx_vertexNormal,
+					frx_fragNormal,
+					light,
+					screenCoord,
+					screenSize,
+					true
+					);
+
+				vec3 toFrag = normalize(pv_eyePos);
+				
+				vec4 fogged;
+				
+				#ifdef SHADOW_MAP_PRESENT
+				{
+					fogged = volumetricFog(
+						u_gbuffer_shadow,
+						u_tex_nature,
+						frx_fragColor,
+						dist,
+						toFrag,
+						outLight.y,
+						getRandomFloat(u_resources, screenCoord, screenSize),
+						gl_FragCoord.z,
+						frx_cameraInWater == 1
+					);
+				}
+				#else
+				{
+					fogged = fog(
+						frx_fragColor,
+						dist,
+						toFrag,
+						frx_cameraInWater == 1
+					);
+				}
+				#endif
+				
+				frx_fragColor = mix(
+					fogged,
+					basicSky(toFrag, skyBase(toFrag, frx_vanillaClearColor)),
+					edgeBlendFactor(dist)
+				);
+				frx_fragColor = ldr_tonemap(frx_fragColor);
+			}
+			#endif
+		}
 	}
 
 	outColor = frx_fragColor;

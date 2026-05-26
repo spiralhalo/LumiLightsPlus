@@ -78,13 +78,14 @@
 	programs: [
 		{
 			name: "bloom0",
-			vertexSource: "lumi:shaders/pass/shading.vert",
+			vertexSource: "lumi:shaders/pass/basic.vert",
 			fragmentSource: "lumi:shaders/pass/after_render_hand/bloom0.frag",
 			samplers: [
 				"u_input",
 				"u_vanilla_depth",
 				"u_color_others",
 				"u_gbuffer_lightnormal",
+				"u_frame_data",
 			]
 		},
 		{
@@ -113,6 +114,7 @@
 					"vanilla_depth",
 					"color_others",
 					"gbuffer_lightnormal",
+					"frame_data",
 				],
 				lod: 0, toggleConfig: "bloom_effect"
 			}, {

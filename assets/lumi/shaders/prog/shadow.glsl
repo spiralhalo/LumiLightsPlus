@@ -4,8 +4,7 @@
  *  lumi:shaders/prog/shadow.glsl
  *******************************************************/
 
-#ifdef POST_SHADER
-#if defined(SHADOW_MAP_PRESENT) && !defined(VERTEX_SHADER)
+#if defined(SHADOW_MAP_PRESENT) && !defined(VERTEX_SHADER) && (defined(POST_SHADER) || defined(FORWARD_TRANSLUCENT))
 
 float sampleShadowPCF(in sampler2DArrayShadow shadowMap, in vec3 shadowPos, in float cascade);
 const float inc = 1.0 / SHADOW_MAP_SIZE;
@@ -191,5 +190,4 @@ float sampleShadowPCF(in sampler2DArrayShadow shadowMap, in vec3 shadowPos, in f
 
 // #endif
 }
-#endif
 #endif

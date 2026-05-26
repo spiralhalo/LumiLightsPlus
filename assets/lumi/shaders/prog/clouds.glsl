@@ -1,7 +1,8 @@
 #include frex:shaders/lib/math.glsl
 #include frex:shaders/lib/noise/cellular2x2.glsl
 #include frex:shaders/lib/noise/noise2d.glsl
-#include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/data/atmosphere.glsl
+#include lumi:shaders/common/contrast.glsl
 #include lumi:shaders/common/texconst.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/tile_noise.glsl
@@ -12,6 +13,7 @@
 
 #define wnoise2(a) cellular2x2(a).x
 
+#if !defined(VERTEX_SHADER) && (defined(POST_SHADER) || defined(FORWARD_TRANSLUCENT))
 const float CLOUD_MARCH_JITTER_STRENGTH = 1.0;
 const float TEXTURE_RADIUS = 512.0;
 const int NUM_SAMPLE = 12;
@@ -89,8 +91,16 @@ bool optimizeStart(float startTravel, float maxDist, vec3 toSky, inout vec3 worl
 	return false;
 }
 
-vec3 rayMarchCloud(sampler2D natureTexture, sampler2DArray resources, vec2 texcoord, float maxDist, vec3 toSky, float numSample, float startTravel)
-{
+vec3 rayMarchCloud(
+	sampler2D natureTexture,
+	sampler2DArray resources,
+	vec2 screenCord,
+	vec2 screenSize,
+	float maxDist,
+	vec3 toSky,
+	float numSample,
+	float startTravel
+) {
 	vec3 lightUnit = frx_skyLightVector * LIGHT_SAMPLE_SIZE;
 	vec3 worldRayPos = vec3(0.0, 63.0, 0.0);
 
@@ -104,7 +114,7 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2DArray resources, vec2 texco
 	if (optimizeStart(startTravel, maxDist, toSky, worldRayPos, sampleSize, numSample, distanceTotal)) return vec3(0.0);
 
 	vec3 unitRay = toSky * sampleSize;
-	float i = getRandomFloat(resources, texcoord, frxu_size) * CLOUD_MARCH_JITTER_STRENGTH;
+	float i = getRandomFloat(resources, screenCord, screenSize) * CLOUD_MARCH_JITTER_STRENGTH;
 
 	worldRayPos += unitRay * i; // start position
 
@@ -140,20 +150,21 @@ vec3 rayMarchCloud(sampler2D natureTexture, sampler2DArray resources, vec2 texco
 	return vec3(lightEnergy, 1.0 - transmittance, fadeOut);
 }
 
-vec2 vanillaClouds(sampler2D cloudsDepthBuffer, float depth, vec2 texcoord)
+vec2 vanillaClouds(sampler2D cloudsDepthBuffer, float depth, vec2 screenCord, vec2 screenSize)
 {
-	float dClouds = texture(cloudsDepthBuffer, texcoord).r;
+	float dClouds = texture(cloudsDepthBuffer, screenCord).r;
 
 	if (dClouds >= depth) return vec2(0.0);
 
-	vec4 temp = frx_inverseViewProjectionMatrix * vec4(texcoord * 2.0 - 1.0, dClouds * 2.0 - 1.0, 1.0);
+	vec4 temp = frx_inverseViewProjectionMatrix * vec4(screenCord * 2.0 - 1.0, dClouds * 2.0 - 1.0, 1.0);
 	vec3 origin = temp.xyz / temp.w;
 
+	vec2 one_pixel = vec2(1.0) / screenSize; // PERF: use v_invSize
 	vec2 txc, txc0, txc1;
 	float dd, d0, d1, mul0, mul1;
 
-	txc0 = vec2(texcoord.x + v_invSize.x, texcoord.y);
-	txc1 = vec2(texcoord.x - v_invSize.x, texcoord.y);
+	txc0 = vec2(screenCord.x + one_pixel.x, screenCord.y);
+	txc1 = vec2(screenCord.x - one_pixel.x, screenCord.y);
 	d0 = texture(cloudsDepthBuffer, txc0).r;
 	d1 = texture(cloudsDepthBuffer, txc1).r;
 
@@ -170,8 +181,8 @@ vec2 vanillaClouds(sampler2D cloudsDepthBuffer, float depth, vec2 texcoord)
 	temp = frx_inverseViewProjectionMatrix * vec4(txc * 2.0 - 1.0, dd * 2.0 - 1.0, 1.0);
 	vec3 right = temp.xyz / temp.w;
 
-	txc0 = vec2(texcoord.x, texcoord.y + v_invSize.y);
-	txc1 = vec2(texcoord.x, texcoord.y - v_invSize.y);
+	txc0 = vec2(screenCord.x, screenCord.y + one_pixel.y);
+	txc1 = vec2(screenCord.x, screenCord.y - one_pixel.y);
 	d0 = texture(cloudsDepthBuffer, txc0).r;
 	d1 = texture(cloudsDepthBuffer, txc1).r;
 
@@ -194,11 +205,22 @@ vec2 vanillaClouds(sampler2D cloudsDepthBuffer, float depth, vec2 texcoord)
 	return vec2(energy, 1.0);
 }
 
-vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2DArray resources, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, float startTravel, vec4 fallback)
+vec4 customClouds(
+	sampler2D cloudsDepthBuffer,
+	sampler2D natureTexture,
+	sampler2DArray resources,
+	float depth,
+	vec2 screenCord,
+	vec2 screenSize,
+	vec3 eyePos,
+	vec3 toSky,
+	int numSample,
+	float startTravel,
+	vec4 fallback)
 {
 	vec3 result;
 	if (frx_worldIsOverworld != 1) {
-		result = vec3(vanillaClouds(cloudsDepthBuffer, depth, texcoord), 1.0);
+		result = vec3(vanillaClouds(cloudsDepthBuffer, depth, screenCord, screenSize), 1.0);
 	} else {
 		#ifdef VOLUMETRIC_CLOUDS
 		#if VOLUMETRIC_CLOUD_MODE == VOLUMETRIC_CLOUD_MODE_SKYBOX
@@ -215,9 +237,9 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 		maxDist = min(length(eyePos), maxDist);
 		#endif
 
-		result = rayMarchCloud(natureTexture, resources, texcoord, maxDist, toSky, numSample, startTravel);
+		result = rayMarchCloud(natureTexture, resources, screenCord, screenSize, maxDist, toSky, numSample, startTravel);
 		#else
-		result = vec3(vanillaClouds(cloudsDepthBuffer, depth, texcoord), 1.0);
+		result = vec3(vanillaClouds(cloudsDepthBuffer, depth, screenCord, screenSize), 1.0);
 		#endif
 	}
 
@@ -239,7 +261,29 @@ vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2
 	return vec4(color, result.y);
 }
 
-vec4 customClouds(sampler2D cloudsDepthBuffer, sampler2D natureTexture, sampler2DArray resources, float depth, vec2 texcoord, vec3 eyePos, vec3 toSky, int numSample, vec4 fallback)
-{
-	return customClouds(cloudsDepthBuffer, natureTexture, resources, depth, texcoord, eyePos, toSky, numSample, 0.0, fallback);
+vec4 customClouds(
+	sampler2D cloudsDepthBuffer,
+	sampler2D natureTexture,
+	sampler2DArray resources,
+	float depth,
+	vec2 screenCord,
+	vec2 screenSize,
+	vec3 eyePos,
+	vec3 toSky,
+	int numSample,
+	vec4 fallback
+) {
+	return customClouds(
+		cloudsDepthBuffer,
+		natureTexture,
+		resources,
+		depth,
+		screenCord,
+		screenSize,
+		eyePos,
+		toSky,
+		numSample,
+		0.0,
+		fallback);
 }
+#endif

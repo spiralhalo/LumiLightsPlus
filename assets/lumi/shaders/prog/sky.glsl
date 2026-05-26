@@ -1,8 +1,9 @@
 #include frex:shaders/lib/noise/cellular2x2x2.glsl
 #include frex:shaders/lib/noise/noise3d.glsl
-#include lumi:shaders/common/atmosphere.glsl
+#include lumi:shaders/data/atmosphere.glsl
+#include lumi:shaders/data/sky_data.glsl
+#include lumi:shaders/data/celest.glsl
 #include lumi:shaders/lib/rectangle.glsl
-#include lumi:shaders/prog/celest.glsl
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
 
@@ -10,24 +11,7 @@
  *  lumi:shaders/prog/sky.glsl
  *******************************************************/
 
-l2_vary mat4 v_star_rotator;
-l2_vary float v_not_in_void;
-l2_vary float v_near_void_core;
-l2_vary float v_cameraAt;
-
-#ifdef VERTEX_SHADER
-
-void skySetup()
-{
-	v_star_rotator = l2_rotationMatrix(vec3(1.0, 0.0, 1.0), frx_worldTime * PI);
-	v_not_in_void	 = l2_clampScale(-65.0, -64.0, frx_cameraPos.y);
-	v_near_void_core = l2_clampScale(-64.0, -128.0, frx_cameraPos.y);
-
-	float rdMult = min(1.0, frx_viewDistance / 512.0);
-	v_cameraAt = mix(0.0, -0.75, l2_clampScale(64.0 + 256.0 * rdMult, 256.0 + 256.0 * rdMult, frx_cameraPos.y));
-}
-
-#else
+#if !defined(VERTEX_SHADER) && (defined(POST_SHADER) || defined(FORWARD_TRANSLUCENT))
 
 const vec3 VOID_CORE_COLOR = hdr_fromGamma(vec3(1.0, 0.7, 0.5));
 
@@ -206,8 +190,17 @@ vec3 skyRadiance(sampler2DArray resources, vec2 material, vec3 toSky, vec2 light
 
 #define skyReflectionFac(march) smoothstep(-0.1, 0.1, march.y)
 
-vec4 skyReflection(sampler2DArray resources, vec3 albedo, vec2 material, vec3 toFrag, vec3 normal, vec2 lightyw) {
-	vec3 toSky = reflectRough(resources, toFrag, normal, material.x);
+vec4 skyReflection(
+	sampler2DArray resources,
+	vec3 albedo,
+	vec2 material,
+	vec3 toFrag,
+	vec3 normal,
+	vec2 lightyw,
+	vec2 screenCoord,
+	vec2 screenSize
+) {
+	vec3 toSky = reflectRough(resources, toFrag, normal, material.x, screenCoord, screenSize);
 	vec3 radiance = skyRadiance(resources, material, toSky, lightyw);
 	return vec4(reflectionPbr(albedo, material, radiance, toSky, -toFrag), 0.0) * skyReflectionFac(toSky);
 }

@@ -1,13 +1,14 @@
 #include frex:shaders/api/world.glsl
 #include frex:shaders/lib/math.glsl
 #include lumi:shaders/common/userconfig.glsl
+#include lumi:shaders/common/resources.glsl
 #include lumi:shaders/lib/util.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/tile_noise.glsl
  *******************************************************/
 
-#ifdef POST_SHADER
+#if defined(POST_SHADER) || defined(FORWARD_TRANSLUCENT)
 #if DITHERING_MODE == DITHERING_MODE_HALTON
 const vec3 tile_randomVec[16] = vec3[16](
 	vec3(0.5, 0.3333333333333333, 0.25), 

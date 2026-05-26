@@ -1,6 +1,6 @@
+#include frex:shaders/api/player.glsl
 #include frex:shaders/api/view.glsl
 #include frex:shaders/api/world.glsl
-#include lumi:shaders/common/atmosphere.glsl
 #include lumi:shaders/lib/util.glsl
 #include lumi:shaders/prog/shadow.glsl
 #include lumi:shaders/prog/water.glsl
@@ -11,7 +11,7 @@
 
 #define RAYS_MIN_DIST 32
 
-#if !defined(VERTEX_SHADER) && defined(SHADOW_MAP_PRESENT)
+#if !defined(VERTEX_SHADER) && defined(SHADOW_MAP_PRESENT) && (defined(POST_SHADER) || defined(FORWARD_TRANSLUCENT))
 float celestialLightRays(
 	sampler2DArrayShadow shadowBuffer,
 	sampler2D natureTexture,
@@ -21,8 +21,7 @@ float celestialLightRays(
 	float tileJitter,
 	float depth,
 	bool isUnderwater
-	)
-{
+) {
 	#ifndef VOLUMETRIC_FOG
 	{
 		// there is no point

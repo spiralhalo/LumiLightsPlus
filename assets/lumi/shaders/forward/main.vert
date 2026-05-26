@@ -17,14 +17,15 @@
  *******************************************************/
 
 out float pv_diffuse;
-out vec3 pv_vertex;
+out vec3 pv_eyePos;
 
 vec2 inv_size = 1.0 / vec2(frx_viewWidth, frx_viewHeight);
 void frx_pipelineVertex()
 {
+	pv_eyePos = (frx_vertex + frx_modelToCamera).xyz;
+	
 	if (frx_modelOriginScreen)
 	{
-		pv_vertex = frx_vertex.xyz;
 		gl_Position = frx_guiViewProjectionMatrix * frx_vertex;
 
 		#ifdef TAA_ENABLED
@@ -44,8 +45,7 @@ void frx_pipelineVertex()
 	}
 	else
 	{
-		frx_vertex += frx_modelToCamera;
-		pv_vertex = frx_vertex.xyz;
+		frx_vertex.xyz = pv_eyePos;
 
 		#ifdef TAA_ENABLED
 		{

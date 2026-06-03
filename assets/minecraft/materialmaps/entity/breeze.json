@@ -1,13 +1,12 @@
 {
  	"map": [
 		{
-		"predicate": {
-			"materialPredicate": {
-					"renderLayerName": "eyes",
+			"predicate": {
+				"materialPredicate": {
 					"texture": "minecraft:textures/entity/breeze/breeze_eyes.png"
-			}
-		},
-		"material": "lumi:tasty_eyeballs"
-	}
+				}
+			},
+			"material": "lumi:tasty_eyeballs"
+		}
 	]
 }

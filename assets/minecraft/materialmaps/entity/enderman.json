@@ -3,11 +3,10 @@
 		{
 			"predicate": {
 				"materialPredicate": {
-					"renderLayerName": "eyes",
-					"texture": "minecraft:textures/entity/enderman/enderman_eyes.png"
+					"renderLayerName": "eyes"
 				}
 			},
-			"material": "lumi:emissive"
+			"material": "lumi:tasty_eyeballs"
 		}
 	]
 }

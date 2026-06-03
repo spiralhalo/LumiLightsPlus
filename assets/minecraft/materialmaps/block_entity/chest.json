@@ -1,3 +1,29 @@
 {
-	"defaultMaterial": "lumiext:iron_wood_transform"
+	"defaultMaterial": "lumiext:iron_wood_transform",
+	"map": [
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_left.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_right.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_exposed.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_exposed_left.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_exposed_right.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_weathered.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_weathered_left.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_weathered_right.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_oxidized.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_oxidized_left.png"}},
+			"material": "lumiext:metal_bumpy_transform"},
+		{"predicate": {"materialPredicate": {"texture": "minecraft:textures/entity/chest/copper_oxidized_right.png"}},
+			"material": "lumiext:metal_bumpy_transform"}
+	]
 }

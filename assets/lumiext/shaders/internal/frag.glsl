@@ -6,6 +6,13 @@
 #include lumiext:shaders/internal/config.glsl
 #include lumi:shaders/api/pbr_ext.glsl
 
+#define VERT_BUMP_DISABLED_LIMIT 0.5
+#define VERT_BUMPY_LIMIT 1.5
+
+#define is_bumpless() frx_var3.z < VERT_BUMP_DISABLED_LIMIT
+#define is_bumpy() frx_var3.z > VERT_BUMP_DISABLED_LIMIT && frx_var3.z < VERT_BUMPY_LIMIT
+#define is_bevel() frx_var3.z > VERT_BUMPY_LIMIT
+
 const float BASE_STONE_ROUGHNESS = clamp(LUMIEXT_BaseStoneRoughness * 0.1, 0.05, 1.0);
 const float POLISHED_ROUGHNESS = clamp(LUMIEXT_PolishedRoughness * 0.1, 0.05, 1.0);
 const float WOOD_PLANKS_ROUGHNESS = clamp(LUMIEXT_WoodPlanksRoughness * 0.1, 0.05, 1.0);

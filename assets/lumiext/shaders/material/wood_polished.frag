@@ -3,18 +3,20 @@
 #include lumiext:shaders/internal/frag.glsl
 
 /******************************************************
-  lumiext:shaders/material/wood_polished.frag
+	lumiext:shaders/material/wood_polished.frag
 ******************************************************/
 
 void frx_materialFragment()
 {
-#ifdef PBR_ENABLED
-  frx_fragRoughness = WOOD_PLANKS_ROUGHNESS;
-#endif
-
-#ifdef PBR_ENABLED
-#ifdef LUMIEXT_ApplyBumpDefault
-  _applyBump();
-#endif
-#endif
+	#ifdef PBR_ENABLED
+	{
+		frx_fragRoughness = WOOD_PLANKS_ROUGHNESS;
+		
+		#ifdef LUMIEXT_ApplyBumpDefault
+		{
+			_applyBump();
+		}
+		#endif
+	}
+	#endif
 }

@@ -3,25 +3,29 @@
 #include lumiext:shaders/internal/frag.glsl
 
 /******************************************************
-  lumiext:shaders/material/iron_wood.frag
+	lumiext:shaders/material/iron_wood.frag
 ******************************************************/
 
 void frx_materialFragment()
 {
-#if LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
-#ifdef PBR_ENABLED
-  vec4 c = frx_sampleColor;
-  float min_ = min( min(c.r, c.g), c.b );
-  float max_ = max( max(c.r, c.g), c.b );
-  float s = max_ > 0 ? (max_ - min_) / max_ : 0;
-  if (s < 0.4) {
-    // frx_fragColor.rgb += (1-min_) * 0.3;
-    frx_fragReflectance = 1.0;
-    frx_fragRoughness = 0.5 - s * 0.5;
-    #ifdef LUMIEXT_ApplyBumpMinerals
-      _applyBump_step_s(0.4, 0.4, frx_modelOriginRegion);
-    #endif
-  }
-#endif
-#endif
+	#if defined(PBR_ENABLED) && LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
+	{
+		float minRGB = min( min(frx_sampleColor.r, frx_sampleColor.g), frx_sampleColor.b );
+		float maxRGB = max( max(frx_sampleColor.r, frx_sampleColor.g), frx_sampleColor.b );
+		float saturation = maxRGB > 0 ? (maxRGB - minRGB) / maxRGB : 0;
+
+		if (saturation < 0.4)
+		{
+			// frx_fragColor.rgb += (1-minRGB) * 0.3;
+			frx_fragReflectance = 1.0;
+			frx_fragRoughness = 0.5 - saturation * 0.5;
+
+			#ifdef LUMIEXT_ApplyBumpMinerals
+			{
+				_applyBump_step_s(0.4, 0.4, frx_modelOriginRegion);
+			}
+			#endif
+		}
+	}
+	#endif
 }

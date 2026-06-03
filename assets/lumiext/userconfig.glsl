@@ -7,7 +7,7 @@
 //___________________________________________________________________________________________________________________________________
 //_OPTION_________________________|_VALUE___|_DESCRIPTION_________________________|_VALUE HINT____________________________|_DEFAULT_|
 #define LUMIEXT_TextureResolution   64   // | Bump map resolution                 |  16~2048                              |  16     |
-#define LUMIEXT_MaterialCoverage    0    // | Selectively apply materials         |  0: All, 1: Texture pack friendly     |  0      |
+#define LUMIEXT_MaterialCoverage    0    // | Selectively apply materials         |  0: All, 1: Texture pack friendly¹    |  0      |
 #define LUMIEXT_ApplyBumpMineralsB  1    // | Bump map for rocks, gem, and metal  |  0: Disable, 1: Enable                |  1      |
 #define LUMIEXT_BricksBevelMode     0    // | Bump map mode for stone* bricks     |  0: Beveled, 1: Texture bump, 2: Off  |  0      |
 #define LUMIEXT_BevelMode           0    // | Bump map mode for tile blocks       |  0: Beveled, 1: Texture bump, 2: Off  |  0      |
@@ -19,3 +19,12 @@
 #define LUMIEXT_WoodPlanksRoughness 6    // | Roughness of wood planks            |  1~10                                 |  5      |
 #define LUMIEXT_HiResBumpsB         0    // | Performance costly hi-res bumps     |  0: Disable, 1: Enable                |  0      |
 //__________________________________________|_____________________________________|_______________________________________|_________|
+//
+// ¹These materials are designed for Vanilla textures:
+// - Ores
+// - Rails
+// - Iron Wood (Barrel, Chest, Door)
+// - Tools (Iron Wood-like)
+// - Copper (Weathering detection)
+// - Crying Obsidian (Glow)
+// - Iron Golem (Metallic & Glow)

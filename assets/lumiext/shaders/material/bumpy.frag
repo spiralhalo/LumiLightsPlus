@@ -3,16 +3,17 @@
 #include lumiext:shaders/internal/frag.glsl
 
 /******************************************************
-  lumiext:shaders/material/bumpy.frag
+	lumiext:shaders/material/bumpy.frag
 ******************************************************/
 
 void frx_materialFragment()
 {
-#ifdef PBR_ENABLED
-#ifdef LUMIEXT_ApplyBumpDefault
-  if (frx_var3.z > 0.5) {
-    _applyBump();
-  }
-#endif
-#endif
+	#if defined(PBR_ENABLED) && defined(LUMIEXT_ApplyBumpDefault)
+	{
+		if (is_bumpy())
+		{
+			_applyBump();
+		}
+	}
+	#endif
 }

@@ -39,7 +39,8 @@ layout(location = 0) out vec4 out_color;
 layout(location = 1) out float out_depth;
 layout(location = 2) out vec4 out_albedo;
 layout(location = 3) out vec4 out_after;
-layout(location = 4) out vec4 fragAfter;
+// layout(location = 4) out vec4 fragAfter;
+// layout(location = 5) out float out_depth_solid;
 
 void main()
 {
@@ -196,10 +197,12 @@ void main()
 			);
 
 			// fog behind translucent terrain only, for perfect reflection
+			#ifndef FORWARD_TRANSLUCENT
 			if (depth_solid > depth_translucent)
 			{
 				solid_output = solid_fogged_output;
 			}
+			#endif
 
 			vec4 clouds = customClouds(
 				u_vanilla_clouds_depth,
@@ -430,11 +433,12 @@ void main()
 	}
 	
 	out_depth = MinimumDepth;
+	// out_depth_solid = depth_solid;
 
 	#ifndef FORWARD_TRANSLUCENT
 	{
 		out_color = hdr_inverseTonemap(
-			premultBlend(premultBlend(premultBlend(translucent_output, before2), before1), solid_output = ldr_tonemap(solid_output))
+			premultBlend(premultBlend(premultBlend(translucent_output, before2), before1), ldr_tonemap(solid_output))
 		);
 		out_after = premultBlend(after2, after1);
 	}

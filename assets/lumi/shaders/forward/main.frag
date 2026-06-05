@@ -33,6 +33,7 @@ uniform sampler2D u_tex_nature;
 
 #ifdef FORWARD_TRANSLUCENT
 uniform sampler2D u_color_result;
+// uniform sampler2D u_color_depth;
 uniform sampler2D u_vanilla_depth; // might be cursed since the same program writes here but only for solids
 uniform sampler2DArray u_gbuffer_lightnormal;
 #endif

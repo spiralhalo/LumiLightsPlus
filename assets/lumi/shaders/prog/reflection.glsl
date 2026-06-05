@@ -2,6 +2,7 @@
 #include lumi:shaders/prog/fog.glsl
 #include lumi:shaders/prog/shading.glsl
 #include lumi:shaders/prog/sky.glsl
+#include lumi:shaders/prog/tonemap.glsl
 
 /*******************************************************
  *  lumi:shaders/prog/reflection.glsl
@@ -58,19 +59,25 @@ vec3 reflectionMarch_v2(
 	vec3 viewMarch,
 	float nearZ,
 	vec2 screenCord
+	// bool prevFrame
 ) {
 	// padding to prevent back face reflection. we want the divisor to be as small as possible.
 	// too small with cause distortion of reflection near the reflector
 	float padding = -viewStartPos.z / 12.;
 	viewStartPos = viewStartPos + viewMarch * padding;
 
-	vec4 temp = frx_projectionMatrix * vec4(viewStartPos, 1.0);
+	vec4 temp;
+	// if (prevFrame)
+	// 	temp = frx_lastProjectionMatrix * vec4(viewStartPos, 1.0);
+	temp = frx_projectionMatrix * vec4(viewStartPos, 1.0);
 	vec3 uvStartPos = temp.xyz / temp.w * 0.5 + 0.5;
 
 	float maxTravel = frx_viewDistance;
 
 	vec3 viewEndPos = viewStartPos + maxTravel * viewMarch;
 	viewEndPos = clipNear(viewEndPos, viewStartPos, nearZ * 30.); // no question
+	// if (prevFrame)
+	// 	temp = frx_lastProjectionMatrix * vec4(viewEndPos, 1.0);
 	temp = frx_projectionMatrix * vec4(viewEndPos, 1.0);
 	vec3 uvEndPos = temp.xyz / temp.w * 0.5 + 0.5;
 
@@ -83,7 +90,7 @@ vec3 reflectionMarch_v2(
 	float thickness = mix(0.0016, 0.0064, abs(viewMarch.z));
 
 	float marchSign = sign(uvMarch.z);
-	float lastZ = texture(depthBuffer, screenCord).r;// - 0.0016 * marchSign;
+	float lastZ = uvStartPos.z;//texture(depthBuffer, screenCord).r;// - 0.0016 * marchSign;
 
 	float sampledZ;
 	float hit = 0.0;
@@ -137,9 +144,16 @@ vec4 reflection(
 	vec2 screenCoord,
 	vec2 screenSize,
 	bool prevFrame
-	)
-{
-	vec3 viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
+) {
+	vec3 viewPos;
+	// if (prevFrame)
+	// 	eyePos += frx_cameraPos - frx_lastCameraPos;
+	// 	viewPos = (frx_lastViewMatrix * vec4(eyePos, 1.0)).xyz;
+	// 	normalMatrix = mat3(frx_lastViewMatrix);
+	// 	vec4 temp = frx_lastProjectionMatrix * vec4(viewPos, 1.0);
+	// 	screenCoord = (temp.xy / temp.w) * 0.5 + 0.5;
+	viewPos = (frx_viewMatrix * vec4(eyePos, 1.0)).xyz;
+
 	float roughness = rawMat.x;
 
 	// TODO: rain puddles?
@@ -147,7 +161,13 @@ vec4 reflection(
 	vec3 jitterPrc;
 
 	// view bobbing shaking reduction, thanks to fewizz
-	vec4 nearPos	= frx_inverseProjectionMatrix * vec4(screenCoord * 2.0 - 1.0, -1.0, 1.0); nearPos.xyz /= nearPos.w;
+	vec4 nearNdc = vec4(screenCoord * 2.0 - 1.0, -1.0, 1.0);
+	vec4 nearPos;
+	// if (prevFrame)
+		// nearPos = inverse(frx_lastProjectionMatrix) * nearNdc;
+	nearPos = frx_inverseProjectionMatrix * nearNdc;
+	nearPos.xyz /= nearPos.w;
+
 	vec3 viewToEye  = normalize(-viewPos + nearPos.xyz);
 	vec3 viewToFrag = -viewToEye;
 	vec3 viewNormal = normalize(frx_normalModelMatrix * normal);
@@ -165,7 +185,8 @@ vec4 reflection(
 		vec3 viewVertexNormal = normalize(frx_normalModelMatrix * vertexNormal);
 		bool impossibleRay	= dot(viewVertexNormal, viewMarch) < 0;
 
-		if (impossibleRay) {
+		if (impossibleRay)
+		{
 			normal = vertexNormal;
 			viewNormal = viewVertexNormal;
 			viewMarch = normalize(reflect(viewToFrag, viewNormal) + jitterPrc);
@@ -181,10 +202,12 @@ vec4 reflection(
 		vec2 uvFade = smoothstep(0.5, 0.475 + l2_clampScale(0.1, 0.0, viewVertexNormal.z) * 0.024, abs(result.xy - 0.5));
 		result.z *= min(uvFade.x, uvFade.y);
 
-		vec4 reflectedPos = (
-			frx_inverseViewProjectionMatrix
-			* vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0)
-		);
+		vec4 reflectedNdc = vec4(result.xy * 2.0 - 1.0, texture(depthBuffer, result.xy).r * 2.0 - 1.0, 1.0);
+		vec4 reflectedPos;
+		// if (prevFrame)
+			// reflectedPos = inverse(frx_lastViewProjectionMatrix) * reflectedNdc;
+		reflectedPos = frx_inverseViewProjectionMatrix * reflectedNdc;
+		 
 		reflectedPos.xyz /= reflectedPos.w;
 		float dist = length(reflectedPos.xyz);
 		float distanceFade = fogFactor(dist, march, frx_cameraInFluid == 1);
@@ -199,20 +222,22 @@ vec4 reflection(
 		result.z *= 1.0 - edgeBlendFade;
 
 		vec4 reflectedColor;
-		
-		if (!prevFrame)
-		{
-			reflectedColor = texture(colorBuffer, result.xy);
-		}
-		else
+		vec2 reflectedUV;
+		if (prevFrame)
 		{
 			vec4 reprojectedPos = (
 				frx_lastViewProjectionMatrix
 				* vec4(reflectedPos.xyz + frx_cameraPos - frx_lastCameraPos, 1.0)
 			);
 			reprojectedPos.xy /= reprojectedPos.w;
-			reflectedColor = texture(colorBuffer, reprojectedPos.xy * 0.5 + 0.5);
+			reflectedUV = reprojectedPos.xy * 0.5 + 0.5;
 		}
+		else
+		{
+			reflectedUV = result.xy;
+		}
+
+		reflectedColor = texture(colorBuffer, reflectedUV);
 
 		objLight = vec4(reflectedColor.rgb, result.z);
 	}

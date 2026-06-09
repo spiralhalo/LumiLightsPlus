@@ -8,7 +8,7 @@
 
 void frx_materialFragment()
 {
-	#ifdef PBR_ENABLED
+	#ifdef LUMIEXT_PBR
 	{
 		if (!frx_fragEnableDiffuse)
 		{
@@ -70,7 +70,7 @@ void frx_materialFragment()
 	frx_fragEnableDiffuse = true;
 	frx_fragEmissive = 0.0;
 
-	#if LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
+	#if defined(LUMIEXT_EnablePBRExt) && LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
 	{
 		// Obsidian
 		if (!frx_fragEnableAo && frx_modelOriginRegion)

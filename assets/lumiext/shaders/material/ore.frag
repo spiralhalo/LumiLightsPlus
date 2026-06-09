@@ -8,7 +8,7 @@
 
 void frx_materialFragment()
 {
-	#ifdef PBR_ENABLED
+	#ifdef LUMIEXT_PBR
 	{
 		frx_fragRoughness = BASE_STONE_ROUGHNESS;
 

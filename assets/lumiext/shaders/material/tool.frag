@@ -10,7 +10,7 @@
 
 void frx_materialFragment()
 {
-	#if defined(PBR_ENABLED) && LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
+	#if defined(LUMIEXT_PBR) && LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
 	{
 		if (!frx_fragEnableDiffuse)
 		{

@@ -7,7 +7,7 @@
 
 void frx_materialVertex()
 {
-	#if defined(PBR_ENABLED) && defined(LUMIEXT_ApplyBumpLow)
+	#if defined(LUMIEXT_PBR) && defined(LUMIEXT_ApplyBumpLow)
 	{
 		float bump_resolution = ONE_PIXEL;
 		frx_var0.xy = frx_mapNormalizedUV(frx_texcoord);

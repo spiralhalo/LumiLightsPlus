@@ -8,7 +8,7 @@
 
 void frx_materialFragment()
 {
-	#if defined(PBR_ENABLED) && LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
+	#if defined(LUMIEXT_PBR) && LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
 	{
 		float minRGB = min( min(frx_sampleColor.r, frx_sampleColor.g), frx_sampleColor.b );
 		float maxRGB = max( max(frx_sampleColor.r, frx_sampleColor.g), frx_sampleColor.b );

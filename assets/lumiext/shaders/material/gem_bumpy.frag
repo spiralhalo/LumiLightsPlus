@@ -8,7 +8,7 @@
 
 void frx_materialFragment()
 {
-	#ifdef PBR_ENABLED
+	#ifdef LUMIEXT_PBR
 	{
 		frx_fragRoughness = 0.1;
 		frx_fragReflectance = 0.2;

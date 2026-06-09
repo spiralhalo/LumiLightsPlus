@@ -7,7 +7,7 @@
 
 void frx_materialVertex()
 {
-	#ifdef PBR_ENABLED
+	#ifdef LUMIEXT_PBR
 	{
 		#if LUMIEXT_BricksBevelMode == LUMIEXT_BricksBevelMode_TextureBump || LUMIEXT_BevelMode == LUMIEXT_BevelMode_TextureBump
 		{

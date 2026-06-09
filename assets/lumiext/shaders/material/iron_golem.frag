@@ -8,7 +8,7 @@
 
 void frx_materialFragment()
 {
-	#ifdef PBR_ENABLED
+	#ifdef LUMIEXT_PBR
 	{
 		#if LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
 		{
@@ -38,7 +38,7 @@ void frx_materialFragment()
 	}
 	#endif
 
-	#if LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
+	#if defined(LUMIEXT_EnablePBRExt) && LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
 	{
 		if (frx_sampleColor.r > frx_sampleColor.g * 2)
 		{

@@ -8,7 +8,7 @@
 
 void frx_materialFragment()
 {
-	#ifdef PBR_ENABLED
+	#ifdef LUMIEXT_PBR
 	{
 		bool isCutCopper = frx_fragEmissive > 0.0; // Cut Copper = cross-shaped
 		bool isWaxedCopper = !frx_fragEnableDiffuse;

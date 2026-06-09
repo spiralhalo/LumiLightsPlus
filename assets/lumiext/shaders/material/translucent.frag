@@ -7,7 +7,7 @@
 
 void frx_materialFragment()
 {
-	#ifdef PBR_ENABLED
+	#ifdef LUMIEXT_PBR
 	{
 		if (!frx_fragEnableDiffuse)
 		{

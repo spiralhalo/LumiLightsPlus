@@ -1,0 +1,42 @@
+{
+	options: [
+		{
+			includeToken: "lumi:pbrext_config",
+			categoryKey: "config.lumi_lights.category.pbrext",
+			options: {
+				pbrx_override_settings: { nameKey: "config.lumi_lights.value.pbrx_override_settings", descriptionKey: "config.lumi_lights.help.pbrx_override_settings",
+					default: true},
+				pbrx_enable_pbrext: { nameKey: "config.lumi_lights.value.pbrx_enable_pbrext", descriptionKey: "config.lumi_lights.help.pbrx_enable_pbrext",
+					default: true},
+				pbrx_material_coverage: { nameKey: "config.lumi_lights.value.pbrx_material_coverage", descriptionKey: "config.lumi_lights.help.pbrx_material_coverage",
+					default: "all", choices: ["all", "texture_pack_friendly"], enum: true, prefix: "pbrx_"},
+
+				pbrx_apply_bump_minerals: { nameKey: "config.lumi_lights.value.pbrx_apply_bump_minerals", descriptionKey: "config.lumi_lights.help.pbrx_apply_bump_minerals",
+					default: true},
+				pbrx_apply_tool_bump: { nameKey: "config.lumi_lights.value.pbrx_apply_tool_bump", descriptionKey: "config.lumi_lights.help.pbrx_apply_tool_bump",
+					default: true},
+				pbrx_apply_bump_default: { nameKey: "config.lumi_lights.value.pbrx_apply_bump_default", descriptionKey: "config.lumi_lights.help.pbrx_apply_bump_default",
+					default: true},
+				pbrx_apply_bump_low: { nameKey: "config.lumi_lights.value.pbrx_apply_bump_low", descriptionKey: "config.lumi_lights.help.pbrx_apply_bump_low",
+					default: false},
+                pbrx_texture_resolution: { nameKey: "config.lumi_lights.value.pbrx_texture_resolution", descriptionKey: "config.lumi_lights.help.pbrx_texture_resolution",
+					default: 64, min: 16, max: 2048},
+
+				pbrx_bricks_bevel_mode: { nameKey: "config.lumi_lights.value.pbrx_bricks_bevel_mode", descriptionKey: "config.lumi_lights.help.pbrx_bricks_bevel_mode",
+					default: "bevel", choices: ["bevel", "texture", "off"], enum: true, prefix: "pbrx_"},
+				pbrx_bevel_mode: { nameKey: "config.lumi_lights.value.pbrx_bevel_mode", descriptionKey: "config.lumi_lights.help.pbrx_bevel_mode",
+					default: "bevel", choices: ["bevel", "texture", "off"], enum: true, prefix: "pbrx_"},
+
+				pbrx_base_stone_roughness: { nameKey: "config.lumi_lights.value.pbrx_base_stone_roughness", descriptionKey: "config.lumi_lights.help.pbrx_base_stone_roughness",
+					default: 7, min: 1, max: 10},
+				pbrx_polished_roughness: { nameKey: "config.lumi_lights.value.pbrx_polished_roughness", descriptionKey: "config.lumi_lights.help.pbrx_polished_roughness",
+					default: 3, min: 1, max: 10},
+				pbrx_wood_planks_roughness: { nameKey: "config.lumi_lights.value.pbrx_wood_planks_roughness", descriptionKey: "config.lumi_lights.help.pbrx_wood_planks_roughness",
+					default: 6, min: 1, max: 10},
+
+				pbrx_hi_res_bumps: { nameKey: "config.lumi_lights.value.pbrx_hi_res_bumps", descriptionKey: "config.lumi_lights.help.pbrx_hi_res_bumps",
+					default: false},
+			}
+		}
+	]
+}

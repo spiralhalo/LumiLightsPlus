@@ -8,7 +8,7 @@
 
 void frx_materialFragment()
 {
-	#if defined(PBR_ENABLED) && defined(LUMIEXT_ApplyBumpDefault)
+	#if defined(LUMIEXT_PBR) && defined(LUMIEXT_ApplyBumpDefault)
 	{
 		if (is_bumpy())
 		{

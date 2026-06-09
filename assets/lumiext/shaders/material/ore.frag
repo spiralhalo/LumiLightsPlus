@@ -11,21 +11,18 @@ void frx_materialFragment()
 	#ifdef LUMIEXT_PBR
 	{
 		frx_fragRoughness = BASE_STONE_ROUGHNESS;
-
-		#ifdef LUMIEXT_ApplyBumpMinerals
-		{
-			_applyBump();
-		}
-		#endif
 	}
 	#endif
+
+	bool isOrePart = false;
 
 	if (frx_fragEmissive > 0)
 	{
 		// Redstone Ore
-		#if LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
+		#if defined(LUMIEXT_EnablePBRExt) && LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
 		{
-			frx_fragEmissive *= float(frx_sampleColor.r > frx_sampleColor.g * 2);
+			isOrePart = frx_sampleColor.r > frx_sampleColor.g * 2;
+			frx_fragEmissive *= float(isOrePart);
 		}
 		#else
 		{
@@ -35,13 +32,15 @@ void frx_materialFragment()
 	}
 	else
 	{
-		#if defined(PBR_ENABLED) && LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
+		#if defined(LUMIEXT_PBR) && LUMIEXT_MaterialCoverage == LUMIEXT_MaterialCoverage_ApplyAll
 		{
 			float minRGB = min( min(frx_sampleColor.r, frx_sampleColor.g), frx_sampleColor.b );
 			float maxRGB = max( max(frx_sampleColor.r, frx_sampleColor.g), frx_sampleColor.b );
 			float saturation = maxRGB > 0 ? (maxRGB - minRGB) / maxRGB : 0;
 
-			if (saturation > 0.3 || minRGB > 0.65)
+			isOrePart = saturation > 0.3 || minRGB > 0.65;
+
+			if (isOrePart)
 			{
 				if (!frx_fragEnableDiffuse)
 				{
@@ -59,6 +58,19 @@ void frx_materialFragment()
 		}
 		#endif
 	}
+
+	#if defined(LUMIEXT_PBR) && defined(LUMIEXT_ApplyBumpLow)
+	{
+		_applyBump();
+	}
+	#elif defined(LUMIEXT_PBR) && defined(LUMIEXT_ApplyBumpMinerals)
+	{
+		if (isOrePart)
+		{
+			_applyBump();
+		}
+	}
+	#endif
 
 	frx_fragEnableDiffuse = true;
 }

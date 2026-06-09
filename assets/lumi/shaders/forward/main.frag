@@ -87,17 +87,15 @@ void frx_pipelineFragment()
 	}
 	else
 	{
-		#if LUMI_PBR_API >= 7
-		pbrExt_resolveProperties();
-		#else // safeguard
-		bool pbrExt_doTBN = true;
-		bool pbr_isWater = false;
-		bool pbr_builtinWater = false;
+		#if LUMI_PBR_API < 8 // safeguard
+			bool pbr_builtinWater = false;
 		#endif
+
+		bool fragIsWater = false;
 
 		if (pbr_builtinWater)
 		{
-			pbr_isWater = true;
+			fragIsWater = true;
 			frx_fragReflectance = 0.02;
 			frx_fragRoughness = 0.05;
 
@@ -132,12 +130,9 @@ void frx_pipelineFragment()
 		// 	frx_fragRoughness = 1.0; // TODO: fix assumption?
 		// }
 
-		if (pbrExt_doTBN)
-		{
-			vec3 bitangent = cross(frx_vertexNormal, frx_vertexTangent.xyz) * frx_vertexTangent.w;
-			mat3 TBN = mat3(frx_vertexTangent.xyz, bitangent, frx_vertexNormal);
-			frx_fragNormal = TBN * frx_fragNormal;
-		}
+		vec3 bitangent = cross(frx_vertexNormal, frx_vertexTangent.xyz) * frx_vertexTangent.w;
+		mat3 TBN = mat3(frx_vertexTangent.xyz, bitangent, frx_vertexNormal);
+		frx_fragNormal = TBN * frx_fragNormal;
 
 		float dist = length(pv_eyePos);
 		// reduce noise caused by micro normal in faraway blocks
@@ -150,7 +145,7 @@ void frx_pipelineFragment()
 		float disableDiffuse = 1.0 - float(frx_fragEnableDiffuse);
 
 		// put water flag last because it makes the material buffer looks blue :D easier to debug
-		float bitFlags = bit_pack(frx_matFlash, frx_matHurt, frx_matGlint, 0., disableDiffuse, 0., 0., float(pbr_isWater));
+		float bitFlags = bit_pack(frx_matFlash, frx_matHurt, frx_matGlint, 0., disableDiffuse, 0., 0., float(fragIsWater));
 
 		// PERF: view normal, more useful than world normal
 		outLight = vec4(frx_fragLight.xy, frx_fragEmissive, 1.0);
@@ -193,7 +188,7 @@ void frx_pipelineFragment()
 				#endif
 				
 				#ifdef WATER_FOAM
-				if (pbr_isWater) {
+				if (fragIsWater) {
 					vec4 solid_eyePos = frx_inverseViewProjectionMatrix * vec4(
 						screenCoord * 2.0 - 1.0,
 						texture(u_vanilla_depth, screenCoord).r * 2.0 - 1.0,
